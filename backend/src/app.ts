@@ -7,6 +7,8 @@ import healthRouter from './routes/health';
 import collegesRouter from './routes/colleges';
 import registrationsRouter from './routes/registrations';
 import campaignsRouter from './routes/campaigns';
+import usersRouter from './routes/users';
+import leaderboardRouter from './routes/leaderboard';
 
 export const createApp = (): Application => {
   const app = express();
@@ -37,6 +39,8 @@ export const createApp = (): Application => {
   app.use('/api/v1/colleges', collegesRouter);
   app.use('/api/v1/registrations', registrationsRouter);
   app.use('/api/v1/campaigns', campaignsRouter);
+  app.use('/api/v1/users', usersRouter);
+  app.use('/api/v1/leaderboard', leaderboardRouter);
 
   // 404 Handler
   app.use((_req: Request, res: Response) => {
