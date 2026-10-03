@@ -28,6 +28,20 @@ export const leaderboardRateLimiter = rateLimit({
   },
 });
 
+export const adminRateLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 30, // max 30 requests per minute
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: {
+      code: 'RATE_LIMITED',
+      message: 'Too many admin API requests. Please slow down.',
+    },
+  },
+});
+
 export const generalRateLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 120,
