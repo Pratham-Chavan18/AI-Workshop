@@ -1,20 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
 import { logger } from './logger';
+import { AppError } from '../utils/errors';
 
-export class AppError extends Error {
-  public statusCode: number;
-  public code: string;
-  public details?: unknown;
-
-  constructor(message: string, statusCode = 400, code = 'BAD_REQUEST', details?: unknown) {
-    super(message);
-    this.statusCode = statusCode;
-    this.code = code;
-    this.details = details;
-    Object.setPrototypeOf(this, new.target.prototype);
-  }
-}
+export { AppError };
 
 export const errorHandler = (
   err: Error,

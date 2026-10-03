@@ -4,6 +4,9 @@ import helmet from 'helmet';
 import { httpLogger } from './middleware/logger';
 import { errorHandler } from './middleware/errorHandler';
 import healthRouter from './routes/health';
+import collegesRouter from './routes/colleges';
+import registrationsRouter from './routes/registrations';
+import campaignsRouter from './routes/campaigns';
 
 export const createApp = (): Application => {
   const app = express();
@@ -26,11 +29,14 @@ export const createApp = (): Application => {
 
   // Health endpoint
   app.use('/health', healthRouter);
-
-  // Base API health check convenience
   app.get('/api/v1/health', (_req: Request, res: Response) => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
   });
+
+  // API v1 routes
+  app.use('/api/v1/colleges', collegesRouter);
+  app.use('/api/v1/registrations', registrationsRouter);
+  app.use('/api/v1/campaigns', campaignsRouter);
 
   // 404 Handler
   app.use((_req: Request, res: Response) => {
