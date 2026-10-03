@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Campaign {
+  id                  String     @id @default(uuid())
+  name                String
+  slug                String     @unique
+  targetRegistrations Int        @default(500)
+  startsAt            DateTime
+  endsAt              DateTime
+  status              String     @default("active") // active, paused, closed
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @default(now()) @updatedAt
+
+  users               User[]
+  referrals           Referral[]
+}
+
+model College {
+  id             String   @id @default(uuid())
+  name           String
+  nameNormalized String   @unique // lowercase, trimmed, punctuation-stripped for deduplication
+  city           String?
+  state          String?
+  createdAt      DateTime @default(now())
+
+  users          User[]
+
+  @@index([nameNormalized])
+}
+
+model User {
+  id               String    @id @default(uuid())
+  campaignId       String
+  collegeId        String
+  fullName         String
+  email            String
+  emailNormalized  String    // lowercase, trimmed
+  phone            String?
+  phoneNormalized  String?   // digits only with country code
+  graduationYear   Int
+  referralCode     String    @unique
+  referredByUserId String?
+  source           String    @default("direct") // direct, whatsapp, linkedin, twitter, instagram, other
+  createdAt        DateTime  @default(now())
+
+  campaign         Campaign  @relation(fields: [campaignId], references: [id])
+  college          College   @relation(fields: [collegeId], references: [id])
+  referredBy       User?     @relation("UserReferrals", fields: [referredByUserId], references: [id])
+  referrals        User[]    @relation("UserReferrals")
+
+  referralsMade    Referral[] @relation("ReferrerReferrals")
+  referralReceived Referral?  @relation("ReferredReferrals")
+
+  @@unique([campaignId, emailNormalized])
+  @@index([campaignId])
+  @@index([referralCode])
+  @@index([collegeId])
+  @@index([referredByUserId])
+  @@index([createdAt])
+}
+
+model Referral {
+  id             String   @id @default(uuid())
+  campaignId     String
+  referrerUserId String
+  referredUserId String   @unique // guarantees exactly one referral record per referred user
+  referralCode   String
+  status         String   @default("valid") // valid, invalid, self_referral
+  createdAt      DateTime @default(now())
+
+  campaign       Campaign @relation(fields: [campaignId], references: [id])
+  referrer       User     @relation("ReferrerReferrals", fields: [referrerUserId], references: [id])
+  referred       User     @relation("ReferredReferrals", fields: [referredUserId], references: [id])
+
+  @@index([campaignId])
+  @@index([referrerUserId])
+  @@index([referralCode])
+  @@index([status])
+}
+
+model AdminUser {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         String   @default("operator") // admin, operator, viewer
+  createdAt    DateTime @default(now())
+}
