@@ -1,0 +1,313 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useColleges } from '@/hooks/useColleges';
+import { registerStudent } from '@/services/registration.service';
+import { College } from '@/types/registration';
+import { Sparkles, Building2, Check, AlertCircle, Loader2 } from 'lucide-react';
+
+const registrationSchema = z.object({
+  fullName: z
+    .string()
+    .min(2, 'Name must be at least 2 characters')
+    .max(100, 'Name cannot exceed 100 characters'),
+  email: z.string().email('Please enter a valid email address'),
+  phone: z
+    .string()
+    .regex(/^\+?[1-9]\d{9,14}$/, 'Enter a valid 10-15 digit phone number')
+    .optional()
+    .or(z.literal('')),
+  collegeId: z.string().uuid('Please select your college from the search list'),
+  graduationYear: z.coerce
+    .number()
+    .int()
+    .min(2024, 'Year must be 2024 or later')
+    .max(2028, 'Year must be 2028 or earlier'),
+  referralCode: z.string().optional(),
+});
+
+type FormValues = z.infer<typeof registrationSchema>;
+
+export const RegistrationForm: React.FC = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const refFromUrl = searchParams.get('ref') || '';
+
+  const [collegeSearchText, setCollegeSearchText] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const { colleges, isLoading: isSearchingColleges } = useColleges(collegeSearchText);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({
+    defaultValues: {
+      fullName: '',
+      email: '',
+      phone: '',
+      collegeId: '',
+      graduationYear: 2025,
+      referralCode: refFromUrl,
+    },
+  });
+
+  const selectedCollegeId = watch('collegeId');
+
+  // If URL contains referral code, initialize
+  useEffect(() => {
+    if (refFromUrl) {
+      setValue('referralCode', refFromUrl.toUpperCase());
+    }
+  }, [refFromUrl, setValue]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSelectCollege = (college: College) => {
+    setValue('collegeId', college.id, { shouldValidate: true });
+    setCollegeSearchText(college.name);
+    setIsDropdownOpen(false);
+  };
+
+  const onSubmit = async (values: FormValues) => {
+    setServerError(null);
+    try {
+      const payload = {
+        fullName: values.fullName.trim(),
+        email: values.email.trim().toLowerCase(),
+        phone: values.phone ? values.phone.trim() : undefined,
+        collegeId: values.collegeId,
+        graduationYear: values.graduationYear,
+        referralCode: values.referralCode ? values.referralCode.trim().toUpperCase() : undefined,
+        source: refFromUrl ? 'whatsapp' : 'direct',
+      };
+
+      const result = await registerStudent(payload);
+      const user = result.user;
+
+      navigate(`/dashboard/${user.id}?code=${user.referralCode}`);
+    } catch (err: any) {
+      const msg = err.message || 'Registration failed. Please check your information and try again.';
+      setServerError(msg);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {/* Referral Code Banner */}
+      {refFromUrl && (
+        <div className="p-3 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs font-semibold text-primary">
+            <Sparkles className="w-4 h-4 fill-primary" />
+            <span>Referral Code Applied: {refFromUrl.toUpperCase()}</span>
+          </div>
+          <Badge variant="default" className="text-[10px] py-0 px-1.5">
+            Credit Active
+          </Badge>
+        </div>
+      )}
+
+      {/* Server Error Alert */}
+      {serverError && (
+        <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-start gap-2.5 text-xs text-rose-600 font-medium">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+          <span>{serverError}</span>
+        </div>
+      )}
+
+      {/* Full Name */}
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-foreground">
+          Full Name <span className="text-primary">*</span>
+        </label>
+        <Input
+          placeholder="e.g. Rahul Sharma"
+          {...register('fullName', {
+            required: 'Full name is required',
+            minLength: { value: 2, message: 'Name must be at least 2 characters' },
+          })}
+        />
+        {errors.fullName && (
+          <p className="text-xs text-rose-500">{errors.fullName.message}</p>
+        )}
+      </div>
+
+      {/* Email Address */}
+      <div className="space-y-1">
+        <label className="text-xs font-semibold text-foreground">
+          College / Personal Email <span className="text-primary">*</span>
+        </label>
+        <Input
+          type="email"
+          placeholder="e.g. rahul@example.com"
+          {...register('email', {
+            required: 'Email is required',
+            pattern: {
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: 'Enter a valid email address',
+            },
+          })}
+        />
+        {errors.email && (
+          <p className="text-xs text-rose-500">{errors.email.message}</p>
+        )}
+      </div>
+
+      {/* College Autocomplete */}
+      <div className="space-y-1 relative" ref={dropdownRef}>
+        <label className="text-xs font-semibold text-foreground">
+          Engineering College / University <span className="text-primary">*</span>
+        </label>
+        <div className="relative">
+          <Input
+            value={collegeSearchText}
+            onChange={(e) => {
+              setCollegeSearchText(e.target.value);
+              setIsDropdownOpen(true);
+              if (selectedCollegeId) {
+                setValue('collegeId', '', { shouldValidate: true });
+              }
+            }}
+            onFocus={() => setIsDropdownOpen(true)}
+            placeholder="Type your college name (e.g. IIT, NIT, BITS)..."
+            className="pr-10"
+          />
+          <div className="absolute right-3 top-3 text-muted-foreground">
+            {isSearchingColleges ? (
+              <Loader2 className="w-5 h-5 animate-spin text-primary" />
+            ) : selectedCollegeId ? (
+              <Check className="w-5 h-5 text-emerald-500" />
+            ) : (
+              <Building2 className="w-5 h-5 text-muted-foreground/60" />
+            )}
+          </div>
+        </div>
+
+        {/* Autocomplete dropdown options */}
+        {isDropdownOpen && collegeSearchText.trim().length >= 2 && (
+          <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-card border border-border rounded-xl shadow-lg max-h-56 overflow-y-auto divide-y divide-border/60">
+            {colleges.length > 0 ? (
+              colleges.map((c) => (
+                <button
+                  type="button"
+                  key={c.id}
+                  onClick={() => handleSelectCollege(c)}
+                  className="w-full text-left p-3 hover:bg-muted text-xs sm:text-sm text-foreground flex items-center justify-between gap-2 transition-colors cursor-pointer"
+                >
+                  <div>
+                    <p className="font-semibold">{c.name}</p>
+                    {(c.city || c.state) && (
+                      <p className="text-xs text-muted-foreground">
+                        {[c.city, c.state].filter(Boolean).join(', ')}
+                      </p>
+                    )}
+                  </div>
+                  {selectedCollegeId === c.id && (
+                    <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                  )}
+                </button>
+              ))
+            ) : (
+              <div className="p-4 text-xs text-muted-foreground text-center">
+                No matching college found. Search "Other" to register manually.
+              </div>
+            )}
+          </div>
+        )}
+
+        {errors.collegeId && (
+          <p className="text-xs text-rose-500">Please select your college from the list</p>
+        )}
+      </div>
+
+      {/* Graduation Year & Phone */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Graduation Year */}
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-foreground">
+            Graduation Year <span className="text-primary">*</span>
+          </label>
+          <select
+            {...register('graduationYear', { valueAsNumber: true })}
+            className="flex h-11 w-full rounded-button border border-input bg-background px-4 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            <option value={2025}>2025 (Final Year)</option>
+            <option value={2026}>2026 (Pre-Final Year)</option>
+            <option value={2027}>2027</option>
+            <option value={2028}>2028</option>
+            <option value={2024}>2024 (Recent Grad)</option>
+          </select>
+        </div>
+
+        {/* Phone Number */}
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-foreground">
+            WhatsApp Number <span className="text-muted-foreground text-[10px]">(Optional)</span>
+          </label>
+          <Input
+            placeholder="e.g. +91 9876543210"
+            {...register('phone')}
+          />
+          {errors.phone && (
+            <p className="text-xs text-rose-500">{errors.phone.message}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Referral Code input (if not already applied from URL) */}
+      {!refFromUrl && (
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-foreground">
+            Referral Code <span className="text-muted-foreground text-[10px]">(Optional)</span>
+          </label>
+          <Input
+            placeholder="e.g. AI60X1"
+            className="uppercase font-mono"
+            {...register('referralCode')}
+          />
+        </div>
+      )}
+
+      {/* Submit Button */}
+      <Button
+        type="submit"
+        size="lg"
+        disabled={isSubmitting}
+        className="w-full mt-4 h-12 text-sm sm:text-base font-semibold"
+      >
+        {isSubmitting ? (
+          <span className="flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>Securing Your Free Seat...</span>
+          </span>
+        ) : (
+          <span>Confirm Free Workshop Registration →</span>
+        )}
+      </Button>
+
+      <p className="text-[11px] text-center text-muted-foreground pt-2">
+        🔒 By registering, you agree to receive workshop access links. Your information is never sold or shared.
+      </p>
+    </form>
+  );
+};
+
+export default RegistrationForm;
