@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -18,9 +19,11 @@ const registrationSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   phone: z
     .string()
-    .regex(/^\+?[1-9]\d{9,14}$/, 'Enter a valid 10-15 digit phone number')
-    .optional()
-    .or(z.literal('')),
+    .refine(
+      (val) => !val || /^\+?[1-9]\d{9,14}$/.test(val.replace(/\s+/g, '')),
+      'Enter a valid 10-15 digit phone number (e.g. +91 9876543210)'
+    )
+    .optional(),
   collegeId: z.string().uuid('Please select your college from the search list'),
   graduationYear: z.coerce
     .number()
@@ -51,6 +54,7 @@ export const RegistrationForm: React.FC = () => {
     watch,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
+    resolver: zodResolver(registrationSchema),
     defaultValues: {
       fullName: '',
       email: '',
@@ -93,7 +97,7 @@ export const RegistrationForm: React.FC = () => {
       const payload = {
         fullName: values.fullName.trim(),
         email: values.email.trim().toLowerCase(),
-        phone: values.phone ? values.phone.trim() : undefined,
+        phone: values.phone ? values.phone.replace(/\s+/g, '').trim() : undefined,
         collegeId: values.collegeId,
         graduationYear: values.graduationYear,
         referralCode: values.referralCode ? values.referralCode.trim().toUpperCase() : undefined,
@@ -138,13 +142,7 @@ export const RegistrationForm: React.FC = () => {
         <label className="text-xs font-semibold text-foreground">
           Full Name <span className="text-primary">*</span>
         </label>
-        <Input
-          placeholder="e.g. Rahul Sharma"
-          {...register('fullName', {
-            required: 'Full name is required',
-            minLength: { value: 2, message: 'Name must be at least 2 characters' },
-          })}
-        />
+        <Input placeholder="e.g. Rahul Sharma" {...register('fullName')} />
         {errors.fullName && (
           <p className="text-xs text-rose-500">{errors.fullName.message}</p>
         )}
@@ -155,17 +153,7 @@ export const RegistrationForm: React.FC = () => {
         <label className="text-xs font-semibold text-foreground">
           College / Personal Email <span className="text-primary">*</span>
         </label>
-        <Input
-          type="email"
-          placeholder="e.g. rahul@example.com"
-          {...register('email', {
-            required: 'Email is required',
-            pattern: {
-              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-              message: 'Enter a valid email address',
-            },
-          })}
-        />
+        <Input type="email" placeholder="e.g. rahul@example.com" {...register('email')} />
         {errors.email && (
           <p className="text-xs text-rose-500">{errors.email.message}</p>
         )}
@@ -173,6 +161,7 @@ export const RegistrationForm: React.FC = () => {
 
       {/* College Autocomplete */}
       <div className="space-y-1 relative" ref={dropdownRef}>
+        <input type="hidden" {...register('collegeId')} />
         <label className="text-xs font-semibold text-foreground">
           Engineering College / University <span className="text-primary">*</span>
         </label>

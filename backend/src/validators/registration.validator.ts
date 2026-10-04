@@ -13,7 +13,12 @@ export const registrationSchema = z.object({
     .trim(),
   phone: z
     .string()
-    .regex(/^\+?[1-9]\d{9,14}$/, 'Invalid phone number format. Provide 10-15 digits with optional country code.')
+    .transform((val) => val.replace(/\s+/g, ''))
+    .pipe(
+      z
+        .string()
+        .regex(/^\+?[1-9]\d{9,14}$/, 'Invalid phone number format. Provide 10-15 digits with optional country code.')
+    )
     .optional()
     .nullable(),
   collegeId: z
