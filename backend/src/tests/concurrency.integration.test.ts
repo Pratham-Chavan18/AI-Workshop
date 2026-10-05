@@ -31,10 +31,20 @@ describe('Real PostgreSQL Concurrency & Unique Constraint Race Condition Tests',
       await realPrisma.$queryRaw`SELECT 1`;
       isPostgresAvailable = true;
 
+      // Pause any other campaigns so concurrency-test-campaign is the only active one
+      await realPrisma.campaign.updateMany({
+        where: { slug: { not: 'concurrency-test-campaign' } },
+        data: { status: 'paused' },
+      });
+
       // Ensure test campaign exists
       const camp = await realPrisma.campaign.upsert({
         where: { slug: 'concurrency-test-campaign' },
-        update: { status: 'active' },
+        update: {
+          status: 'active',
+          startsAt: new Date(Date.now() - 3600000),
+          endsAt: new Date(Date.now() + 86400000 * 30),
+        },
         create: {
           name: 'Concurrency Test Campaign',
           slug: 'concurrency-test-campaign',
@@ -76,6 +86,10 @@ describe('Real PostgreSQL Concurrency & Unique Constraint Race Condition Tests',
         });
         await realPrisma.campaign.deleteMany({
           where: { id: testCampaignId },
+        });
+        await realPrisma.campaign.updateMany({
+          where: { slug: 'ai60-oct-2026' },
+          data: { status: 'active' },
         });
       } catch (e) {
         // ignore cleanup error

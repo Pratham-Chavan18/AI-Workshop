@@ -27,13 +27,18 @@ export interface RegisterResult {
 export async function registerStudent(input: RegistrationInput): Promise<RegisterResult> {
   const normalized = normalizeRegistration(input);
 
-  // 1. Fetch currently active campaign & verify valid campaign time window
+  const now = new Date();
+
+  // 1. Fetch currently active campaign within valid campaign time window
   const campaign = await prisma.campaign.findFirst({
-    where: { status: 'active' },
+    where: {
+      status: 'active',
+      startsAt: { lte: now },
+      endsAt: { gte: now },
+    },
     orderBy: { startsAt: 'desc' },
   });
 
-  const now = new Date();
   if (
     !campaign ||
     campaign.status !== 'active' ||

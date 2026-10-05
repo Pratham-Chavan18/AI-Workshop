@@ -12,6 +12,7 @@ const router = Router();
 // Primary authenticated session-derived dashboard endpoints (No IDOR possible)
 router.get('/me', generalRateLimiter, requireStudentSession, getMyDashboardHandler);
 router.get('/me/dashboard', generalRateLimiter, requireStudentSession, getMyDashboardHandler);
+router.get('/me/referrals', generalRateLimiter, requireStudentSession, getMyDashboardHandler);
 router.post('/logout', logoutStudentHandler);
 
 // Access-controlled endpoint (enforces that student session matches :userId, returning 403 on mismatch)

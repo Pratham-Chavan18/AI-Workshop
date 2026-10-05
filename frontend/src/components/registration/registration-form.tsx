@@ -30,7 +30,7 @@ const registrationSchema = z.object({
     .number()
     .int()
     .min(2024, 'Year must be 2024 or later')
-    .max(2028, 'Year must be 2028 or earlier'),
+    .max(2030, 'Year must be 2030 or earlier'),
   referralCode: z
     .string()
     .refine(
@@ -317,6 +317,8 @@ export const RegistrationForm: React.FC = () => {
             <option value={2026}>2026 (Pre-Final Year)</option>
             <option value={2027}>2027</option>
             <option value={2028}>2028</option>
+            <option value={2029}>2029</option>
+            <option value={2030}>2030</option>
             <option value={2024}>2024 (Recent Grad)</option>
           </select>
         </div>

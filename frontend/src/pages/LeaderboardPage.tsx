@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -11,6 +11,30 @@ import { Trophy, Users, ArrowUpRight, Flame, Building2 } from 'lucide-react';
 
 export const LeaderboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'campuses' | 'referrers'>('campuses');
+  const campusesTabRef = useRef<HTMLButtonElement>(null);
+  const referrersTabRef = useRef<HTMLButtonElement>(null);
+
+  const handleTabKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (activeTab === 'campuses') {
+        setActiveTab('referrers');
+        referrersTabRef.current?.focus();
+      } else {
+        setActiveTab('campuses');
+        campusesTabRef.current?.focus();
+      }
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (activeTab === 'referrers') {
+        setActiveTab('campuses');
+        campusesTabRef.current?.focus();
+      } else {
+        setActiveTab('referrers');
+        referrersTabRef.current?.focus();
+      }
+    }
+  };
 
   useEffect(() => {
     document.title = 'Campus Leaderboard | AI Workshop | NxtWave';
@@ -88,14 +112,17 @@ export const LeaderboardPage: React.FC = () => {
           <div
             role="tablist"
             aria-label="Leaderboard views"
+            onKeyDown={handleTabKeyDown}
             className="mt-8 inline-flex p-1 bg-white rounded-pill border border-black gap-1"
           >
             <button
+              ref={campusesTabRef}
               type="button"
               role="tab"
               id="tab-campuses"
               aria-selected={activeTab === 'campuses'}
               aria-controls="panel-campuses"
+              tabIndex={activeTab === 'campuses' ? 0 : -1}
               onClick={() => setActiveTab('campuses')}
               className={`flex items-center gap-2 px-6 py-2.5 rounded-pill text-xs sm:text-sm font-bold tracking-[0.03em] transition-all cursor-pointer ${
                 activeTab === 'campuses'
@@ -108,11 +135,13 @@ export const LeaderboardPage: React.FC = () => {
             </button>
 
             <button
+              ref={referrersTabRef}
               type="button"
               role="tab"
               id="tab-referrers"
               aria-selected={activeTab === 'referrers'}
               aria-controls="panel-referrers"
+              tabIndex={activeTab === 'referrers' ? 0 : -1}
               onClick={() => setActiveTab('referrers')}
               className={`flex items-center gap-2 px-6 py-2.5 rounded-pill text-xs sm:text-sm font-bold tracking-[0.03em] transition-all cursor-pointer ${
                 activeTab === 'referrers'
@@ -128,15 +157,22 @@ export const LeaderboardPage: React.FC = () => {
 
         {/* Tab Panels */}
         <div className="max-w-4xl mx-auto">
-          {activeTab === 'campuses' ? (
-            <div role="tabpanel" id="panel-campuses" aria-labelledby="tab-campuses">
-              <CampusLeaderboard />
-            </div>
-          ) : (
-            <div role="tabpanel" id="panel-referrers" aria-labelledby="tab-referrers">
-              <ReferrerLeaderboard />
-            </div>
-          )}
+          <div
+            role="tabpanel"
+            id="panel-campuses"
+            aria-labelledby="tab-campuses"
+            hidden={activeTab !== 'campuses'}
+          >
+            <CampusLeaderboard />
+          </div>
+          <div
+            role="tabpanel"
+            id="panel-referrers"
+            aria-labelledby="tab-referrers"
+            hidden={activeTab !== 'referrers'}
+          >
+            <ReferrerLeaderboard />
+          </div>
 
           {/* Bottom CTA to Register */}
           <div className="mt-12 text-center p-8 bg-slush-sky border border-black rounded-[28px] flex flex-col sm:flex-row items-center justify-between gap-4">

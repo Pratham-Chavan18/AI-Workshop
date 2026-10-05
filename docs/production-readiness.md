@@ -198,7 +198,7 @@ To prevent cross-campaign referral theft or attribution pollution:
 ## 11. Monitoring & Observability
 
 - **Liveness Probe**: `GET /health/live` (Returns HTTP 200 `{ status: "ok" }`).
-- **Readiness Probe**: `GET /health/ready` (Executes bounded `SELECT 1` ping with 3-second timeout; returns HTTP 200 `{ status: "ok", database: "connected" }` or HTTP 503 on database unavailability).
+- **Readiness Probe**: `GET /health/ready` (Executes bounded `SELECT 1` ping with 3-second timeout; returns HTTP 200 `{ status: "ready", database: "connected" }` or HTTP 503 on database unavailability).
 
 ---
 

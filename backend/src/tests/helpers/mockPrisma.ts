@@ -19,8 +19,8 @@ export const mockPrisma = {
       name: 'Build Your First AI Project in 60 Minutes',
       slug: 'ai60-oct-2026',
       targetRegistrations: 500,
-      startsAt: new Date('2026-10-04'),
-      endsAt: new Date('2026-11-04'),
+      startsAt: new Date(Date.now() - 86400000),
+      endsAt: new Date(Date.now() + 86400000 * 30),
       status: 'active',
     }),
     findUnique: vi.fn().mockResolvedValue({
@@ -28,8 +28,8 @@ export const mockPrisma = {
       name: 'Build Your First AI Project in 60 Minutes',
       slug: 'ai60-oct-2026',
       targetRegistrations: 500,
-      startsAt: new Date('2026-10-04'),
-      endsAt: new Date('2026-11-04'),
+      startsAt: new Date(Date.now() - 86400000),
+      endsAt: new Date(Date.now() + 86400000 * 30),
       status: 'active',
       _count: { users: 12, referrals: 4 },
     }),
@@ -162,6 +162,15 @@ export const mockPrisma = {
   },
   referral: {
     findUnique: vi.fn().mockResolvedValue(null),
+    findFirst: vi.fn().mockImplementation(({ where }) => {
+      if (where?.referredUserId && where?.campaignId) {
+        const found = mockDb.referrals.find(
+          (r) => r.referredUserId === where.referredUserId && r.campaignId === where.campaignId
+        );
+        return Promise.resolve(found || null);
+      }
+      return Promise.resolve(null);
+    }),
     create: vi.fn().mockImplementation(({ data }) => {
       const newRef = {
         id: `ref-${mockDb.referrals.length + 1}`,

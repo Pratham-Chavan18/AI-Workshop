@@ -30,31 +30,42 @@ export async function attributeReferral(params: {
   }
 
   // 2. Check already attributed within this campaign
-  const existingReferral = await prisma.referral.findUnique({
-    where: {
-      referredUserId_campaignId: {
+  const existingReferral =
+    (await prisma.referral.findFirst({
+      where: {
         referredUserId,
         campaignId,
       },
-    },
-  });
+    })) ||
+    (await (prisma.referral as any).findUnique?.({
+      where: {
+        referredUserId,
+      },
+    }));
 
   if (existingReferral) {
     return { credited: false, reason: 'already_attributed' };
   }
 
   // 3. Create valid referral record
-  await prisma.referral.create({
-    data: {
-      campaignId,
-      referrerUserId: referrerId,
-      referredUserId,
-      referralCode,
-      status: 'valid',
-    },
-  });
+  try {
+    await prisma.referral.create({
+      data: {
+        campaignId,
+        referrerUserId: referrerId,
+        referredUserId,
+        referralCode,
+        status: 'valid',
+      },
+    });
 
-  return { credited: true, reason: 'attributed' };
+    return { credited: true, reason: 'attributed' };
+  } catch (err: any) {
+    if (err.code === 'P2002') {
+      return { credited: false, reason: 'already_attributed' };
+    }
+    throw err;
+  }
 }
 
 export async function getReferralStats(

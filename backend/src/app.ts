@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import { httpLogger, logger } from './middleware/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { env } from './config/env';
+import { prisma } from './lib/prisma';
 import healthRouter from './routes/health';
 import collegesRouter from './routes/colleges';
 import registrationsRouter from './routes/registrations';
@@ -58,6 +59,22 @@ export const createApp = (): Application => {
 
   // Health and Observability endpoints (mounted without auth)
   app.use('/health', healthRouter);
+  app.get('/liveness', (_req: Request, res: Response) => {
+    res.status(200).json({ status: 'ok', uptime: process.uptime() });
+  });
+  app.get('/readiness', async (_req: Request, res: Response) => {
+    try {
+      await Promise.race([
+        prisma.$queryRaw`SELECT 1`,
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Database ping timed out')), 1000)
+        ),
+      ]);
+      res.status(200).json({ status: 'ready', database: 'connected' });
+    } catch {
+      res.status(503).json({ status: 'degraded', database: 'disconnected' });
+    }
+  });
   app.get('/api/v1/health', (_req: Request, res: Response) => {
     res.status(200).json({ status: 'ok', uptime: process.uptime(), timestamp: new Date().toISOString() });
   });

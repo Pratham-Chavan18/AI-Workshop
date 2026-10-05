@@ -8,7 +8,11 @@ import {
 
 async function resolveCampaignId(queryCampaignId?: string): Promise<string | null> {
   if (queryCampaignId) {
-    return queryCampaignId;
+    const campaign = await prisma.campaign.findFirst({
+      where: { id: queryCampaignId, status: 'active' },
+      select: { id: true },
+    });
+    return campaign ? campaign.id : null;
   }
   const active = await prisma.campaign.findFirst({
     where: { status: 'active' },
@@ -23,7 +27,20 @@ export const campusLeaderboardHandler = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const campaignId = await resolveCampaignId(req.query.campaignId as string | undefined);
+    const requestedId = req.query.campaignId as string | undefined;
+    const campaignId = await resolveCampaignId(requestedId);
+
+    if (requestedId && !campaignId) {
+      res.status(404).json({
+        success: false,
+        error: {
+          code: 'CAMPAIGN_NOT_FOUND',
+          message: 'The requested campaign was not found or is not active.',
+        },
+      });
+      return;
+    }
+
     if (!campaignId) {
       res.status(200).json({ items: [], total: 0 });
       return;
@@ -47,7 +64,20 @@ export const referrerLeaderboardHandler = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const campaignId = await resolveCampaignId(req.query.campaignId as string | undefined);
+    const requestedId = req.query.campaignId as string | undefined;
+    const campaignId = await resolveCampaignId(requestedId);
+
+    if (requestedId && !campaignId) {
+      res.status(404).json({
+        success: false,
+        error: {
+          code: 'CAMPAIGN_NOT_FOUND',
+          message: 'The requested campaign was not found or is not active.',
+        },
+      });
+      return;
+    }
+
     if (!campaignId) {
       res.status(200).json({ items: [] });
       return;

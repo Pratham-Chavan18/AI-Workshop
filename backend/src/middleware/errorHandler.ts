@@ -38,6 +38,30 @@ export const errorHandler = (
     return;
   }
 
+  // Fallback handler for raw Prisma P2002 unique constraint violations
+  if ((err as any).code === 'P2002') {
+    const target = (err as any).meta?.target;
+    const targetFields = Array.isArray(target) ? target : typeof target === 'string' ? [target] : [];
+    const isEmail = targetFields.some((f: string) => f.includes('emailNormalized') || f.includes('email'));
+    const isPhone = targetFields.some((f: string) => f.includes('phoneNormalized') || f.includes('phone'));
+    const code = isEmail
+      ? 'EMAIL_ALREADY_REGISTERED'
+      : isPhone
+        ? 'PHONE_ALREADY_REGISTERED'
+        : 'DUPLICATE_REGISTRATION';
+    const message = isEmail
+      ? 'This email is already registered for the workshop'
+      : isPhone
+        ? 'This phone number is already registered for the workshop'
+        : 'A registration with these details already exists';
+    logger.warn({ code, message, target: targetFields }, 'Mapped Prisma P2002 error in errorHandler');
+    res.status(409).json({
+      success: false,
+      error: { code, message },
+    });
+    return;
+  }
+
   logger.error(err, 'Unhandled Server Error');
   res.status(500).json({
     success: false,

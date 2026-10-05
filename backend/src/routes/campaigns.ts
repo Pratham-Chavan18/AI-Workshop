@@ -39,8 +39,8 @@ router.get('/:campaignId/stats', generalRateLimiter, async (req: Request, res: R
     if (!z.string().uuid().safeParse(campaignId).success) {
       throw validationError('Invalid campaign ID format. Must be a valid UUID.');
     }
-    const campaign = await prisma.campaign.findUnique({
-      where: { id: campaignId },
+    const campaign = await prisma.campaign.findFirst({
+      where: { id: campaignId, status: 'active' },
       include: {
         _count: {
           select: {
@@ -52,7 +52,7 @@ router.get('/:campaignId/stats', generalRateLimiter, async (req: Request, res: R
     });
 
     if (!campaign) {
-      throw notFound('Campaign not found');
+      throw notFound('Campaign not found or not active');
     }
 
     res.status(200).json({

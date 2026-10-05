@@ -38,8 +38,8 @@ describe('Registration Validator & API Tests', () => {
       expect(normalizePhone('+91 98765 43210')).toBe('+919876543210');
     });
 
-    it('should normalize misplaced plus to leading plus for consistent collision', () => {
-      expect(normalizePhone('91+9876543210')).toBe('+919876543210');
+    it('should preserve plus only when it is the first character', () => {
+      expect(normalizePhone('91+9876543210')).toBe('919876543210');
     });
 
     it('should preserve only a single leading plus', () => {
@@ -125,6 +125,11 @@ describe('Registration Validator & API Tests', () => {
       const parsed = registrationSchema.parse(basePayload);
       expect(parsed.referralCode).toBeUndefined();
     });
+
+    it('should accept null referralCode and preserve it as null', () => {
+      const parsed = registrationSchema.parse({ ...basePayload, referralCode: null });
+      expect(parsed.referralCode).toBeNull();
+    });
   });
 
   it('should reject invalid email addresses with ZodError', () => {
@@ -151,16 +156,66 @@ describe('Registration Validator & API Tests', () => {
     expect(result.success).toBe(false);
   });
 
-  it('should reject graduation year outside 2024-2028', () => {
-    const invalid = {
+  it('should accept valid graduation years 2024 through 2030 and reject outside range', () => {
+    const valid2030 = {
       fullName: 'Test User',
       email: 'user@test.com',
       collegeId: '123e4567-e89b-12d3-a456-426614174000',
       graduationYear: 2030,
     };
+    expect(registrationSchema.safeParse(valid2030).success).toBe(true);
 
-    const result = registrationSchema.safeParse(invalid);
-    expect(result.success).toBe(false);
+    const invalid2031 = {
+      ...valid2030,
+      graduationYear: 2031,
+    };
+    expect(registrationSchema.safeParse(invalid2031).success).toBe(false);
+
+    const invalid2023 = {
+      ...valid2030,
+      graduationYear: 2023,
+    };
+    expect(registrationSchema.safeParse(invalid2023).success).toBe(false);
+  });
+
+  describe('Full name validation & trimming', () => {
+    const base = {
+      email: 'user@test.com',
+      collegeId: '123e4567-e89b-12d3-a456-426614174000',
+      graduationYear: 2025,
+    };
+
+    it('should reject whitespace-only names', () => {
+      expect(registrationSchema.safeParse({ ...base, fullName: '   ' }).success).toBe(false);
+    });
+
+    it('should reject single-character names', () => {
+      expect(registrationSchema.safeParse({ ...base, fullName: 'A' }).success).toBe(false);
+    });
+
+    it('should trim and accept valid names of length >= 2', () => {
+      const parsed = registrationSchema.parse({ ...base, fullName: '  Jane Doe  ' });
+      expect(parsed.fullName).toBe('Jane Doe');
+    });
+  });
+
+  describe('Required field enforcement without unwanted defaults', () => {
+    const validPayload = {
+      fullName: 'Valid Student',
+      email: 'student@example.com',
+      collegeId: '123e4567-e89b-12d3-a456-426614174000',
+      graduationYear: 2025,
+    };
+
+    it('should reject when graduationYear is missing or undefined', () => {
+      const { graduationYear, ...missingGradYear } = validPayload;
+      expect(registrationSchema.safeParse(missingGradYear).success).toBe(false);
+    });
+
+    it('should reject when collegeId is missing even if campus is provided', () => {
+      const { collegeId, ...missingCollege } = validPayload;
+      expect(registrationSchema.safeParse({ ...missingCollege, campus: 'IIT Bombay' }).success).toBe(false);
+    });
   });
 
   it('should return HTTP 400 when required fields are missing on POST /api/v1/registrations', async () => {

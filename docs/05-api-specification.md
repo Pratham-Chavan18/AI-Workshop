@@ -199,7 +199,7 @@ Streams paginated CSV records (500 per chunk). Formula characters (`=`, `+`, `-`
 ## 8. Health & Observability Probes
 
 - `GET /health/live`: Process liveness probe (200 OK `{ status: "ok" }`).
-- `GET /health/ready`: Database readiness probe with 3-second bounded timeout (200 OK `{ status: "ok", database: "connected" }`).
+- `GET /health/ready`: Database readiness probe with 3-second bounded timeout (200 OK `{ status: "ready", database: "connected" }`).
 
 ---
 

@@ -55,34 +55,33 @@ async function main() {
   // - Never overwrite existing admin credentials
   // - Never seed a default/hardcoded password
   // - Require explicit ADMIN_BOOTSTRAP_EMAIL & ADMIN_BOOTSTRAP_PASSWORD
-  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL;
-  const bootstrapPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD;
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL || process.env.ADMIN_EMAIL;
+  const bootstrapPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD || process.env.ADMIN_PASSWORD;
   const bootstrapRole = (process.env.ADMIN_BOOTSTRAP_ROLE as 'admin' | 'operator' | 'viewer') || 'admin';
 
   const existingAdminCount = await prisma.adminUser.count();
 
   if (existingAdminCount === 0) {
-    if (!bootstrapEmail || !bootstrapPassword) {
-      console.warn('⚠️ No AdminUser exists and ADMIN_BOOTSTRAP_EMAIL / ADMIN_BOOTSTRAP_PASSWORD are not set. Skipping admin creation.');
-      if (process.env.NODE_ENV === 'production') {
-        throw new Error('Bootstrap admin credentials required when no admin exists in production.');
-      }
-    } else {
-      if (bootstrapPassword.length < 12) {
-        throw new Error('ADMIN_BOOTSTRAP_PASSWORD must be at least 12 characters.');
-      }
-      const hashedPassword = await hashPassword(bootstrapPassword);
-      const createdAdmin = await prisma.adminUser.create({
-        data: {
-          email: bootstrapEmail.toLowerCase().trim(),
-          passwordHash: hashedPassword,
-          role: bootstrapRole,
-        },
-      });
-      console.log(`✅ Bootstrapped initial admin user: ${createdAdmin.email} with role: ${createdAdmin.role}`);
+    if (!bootstrapPassword) {
+      console.error('❌ Failed to seed admin: ADMIN_PASSWORD (or ADMIN_BOOTSTRAP_PASSWORD) environment variable is required.');
+      process.exit(1);
     }
+    const email = (bootstrapEmail || 'admin@aiworkshop.nxtwave.com').toLowerCase().trim();
+    if (bootstrapPassword.length < 12) {
+      console.error('❌ ADMIN_PASSWORD must be at least 12 characters.');
+      process.exit(1);
+    }
+    const hashedPassword = await hashPassword(bootstrapPassword);
+    const createdAdmin = await prisma.adminUser.create({
+      data: {
+        email,
+        passwordHash: hashedPassword,
+        role: bootstrapRole,
+      },
+    });
+    console.log(`✅ Bootstrapped initial admin user: ${createdAdmin.email} with role: ${createdAdmin.role}`);
   } else {
-    console.log(`ℹ️ Existing admin accounts detected (${existingAdminCount}). Preserving existing admin credentials without overwriting.`);
+    console.log('ℹ️ Admin already exists, skipping admin creation.');
   }
 
   console.log('Seed complete', {

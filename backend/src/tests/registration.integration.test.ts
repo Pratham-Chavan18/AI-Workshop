@@ -15,8 +15,8 @@ describe('Registration Integration Tests (Phone Normalization & Campaign Scoping
       name: 'Build Your First AI Project in 60 Minutes',
       slug: 'ai60-oct-2026',
       targetRegistrations: 500,
-      startsAt: new Date('2026-10-04'),
-      endsAt: new Date('2026-11-04'),
+      startsAt: new Date(Date.now() - 86400000),
+      endsAt: new Date(Date.now() + 86400000 * 30),
       status: 'active',
     });
 
@@ -31,11 +31,11 @@ describe('Registration Integration Tests (Phone Normalization & Campaign Scoping
   // BLOCKER 1: Prove phone uniqueness collides across formats
   it('collides when the same phone is submitted in two formats', async () => {
     await request(app).post('/api/registrations').send({
-      name: 'A', email: 'a@x.com', campus: 'X', phone: '+919876543210',
+      fullName: 'Alice Student', email: 'a@x.com', collegeId, graduationYear: 2025, phone: '+919876543210',
     }).expect(201);
 
     const res = await request(app).post('/api/registrations').send({
-      name: 'B', email: 'b@x.com', campus: 'X', phone: '+91 98765 43210',
+      fullName: 'Bob Student', email: 'b@x.com', collegeId, graduationYear: 2025, phone: '+91 98765 43210',
     });
     expect(res.status).toBe(409);
     expect(res.body.error.code).toBe('PHONE_ALREADY_REGISTERED');
@@ -43,11 +43,11 @@ describe('Registration Integration Tests (Phone Normalization & Campaign Scoping
 
   it('collides when + is misplaced in the second submission', async () => {
     await request(app).post('/api/registrations').send({
-      name: 'C', email: 'c@x.com', campus: 'X', phone: '+919876543210',
+      fullName: 'Charlie Student', email: 'c@x.com', collegeId, graduationYear: 2025, phone: '+919876543210',
     }).expect(201);
 
     const res = await request(app).post('/api/registrations').send({
-      name: 'D', email: 'd@x.com', campus: 'X', phone: '91+9876543210',
+      fullName: 'Dave Student', email: 'd@x.com', collegeId, graduationYear: 2025, phone: '+91+9876543210',
     });
     expect(res.status).toBe(409);
     expect(res.body.error.code).toBe('PHONE_ALREADY_REGISTERED');
@@ -266,8 +266,8 @@ describe('Registration Integration Tests (Phone Normalization & Campaign Scoping
       name: 'Workshop Batch A',
       slug: 'batch-a',
       targetRegistrations: 500,
-      startsAt: new Date('2026-10-04'),
-      endsAt: new Date('2026-11-04'),
+      startsAt: new Date(Date.now() - 86400000),
+      endsAt: new Date(Date.now() + 86400000 * 30),
       status: 'active',
     });
 
@@ -288,8 +288,8 @@ describe('Registration Integration Tests (Phone Normalization & Campaign Scoping
       name: 'Workshop Batch B',
       slug: 'batch-b',
       targetRegistrations: 500,
-      startsAt: new Date('2026-10-01'),
-      endsAt: new Date('2026-11-01'),
+      startsAt: new Date(Date.now() - 86400000),
+      endsAt: new Date(Date.now() + 86400000 * 30),
       status: 'active',
     });
 

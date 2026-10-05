@@ -151,7 +151,21 @@ export const AdminPage: React.FC = () => {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (err: any) {
-      alert(err.message || 'Failed to download CSV export. Please check your role permissions.');
+      let serverMessage: string | null = null;
+      if (err.response?.data instanceof Blob) {
+        try {
+          const text = await err.response.data.text();
+          const parsed = JSON.parse(text);
+          serverMessage = parsed.error?.message || parsed.message || null;
+        } catch {
+          // not JSON, fallback to err.message
+        }
+      } else if (err.response?.data?.error?.message) {
+        serverMessage = err.response.data.error.message;
+      } else if (err.response?.data?.message) {
+        serverMessage = err.response.data.message;
+      }
+      alert(serverMessage || err.message || 'Failed to download CSV export. Please check your role permissions.');
     } finally {
       setIsExporting(false);
     }
