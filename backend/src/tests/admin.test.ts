@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import './helpers/mockPrisma';
 import request from 'supertest';
 import { app } from '../app';
+import { safeEqual } from '../middleware/adminAuth';
 
 const TEST_ADMIN_KEY = 'nxtwave-super-secret-admin-key-2026';
 
@@ -18,14 +19,14 @@ describe('Admin Authentication & Security Tests', () => {
     expect(res.body.error.code).toBe('UNAUTHORIZED');
   });
 
-  it('should reject access with HTTP 403 when X-Admin-Key is invalid', async () => {
+  it('should reject access with HTTP 401 when X-Admin-Key is invalid', async () => {
     const res = await request(app)
       .get('/api/v1/admin/campaigns/dummy-id/stats')
       .set('X-Admin-Key', 'definitely-wrong-key');
 
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(401);
     expect(res.body.success).toBe(false);
-    expect(res.body.error.code).toBe('FORBIDDEN');
+    expect(res.body.error.code).toBe('UNAUTHORIZED');
   });
 
   it('should accept access when valid X-Admin-Key is supplied', async () => {
@@ -46,5 +47,11 @@ describe('Admin Authentication & Security Tests', () => {
     expect(res.status).toBe(200);
     expect(res.headers['content-type']).toContain('text/csv');
     expect(res.headers['content-disposition']).toContain('attachment');
+  });
+
+  it('safeEqual returns true for matching keys and false for mismatched keys or lengths', () => {
+    expect(safeEqual(TEST_ADMIN_KEY, TEST_ADMIN_KEY)).toBe(true);
+    expect(safeEqual('wrong-key', TEST_ADMIN_KEY)).toBe(false);
+    expect(safeEqual('', TEST_ADMIN_KEY)).toBe(false);
   });
 });

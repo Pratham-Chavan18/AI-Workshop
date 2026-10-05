@@ -1,7 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
-import crypto from 'crypto';
+import { timingSafeEqual } from 'crypto';
 import { logger } from './logger';
 import { env } from '../config/env';
+
+export function safeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  return ab.length === bb.length && timingSafeEqual(ab, bb);
+}
 
 export const requireAdminKey = (req: Request, res: Response, next: NextFunction): void => {
   const providedKey = req.headers['x-admin-key'];
@@ -31,17 +37,11 @@ export const requireAdminKey = (req: Request, res: Response, next: NextFunction)
   }
 
   // Timing-safe comparison to prevent timing attacks
-  const providedBuffer = Buffer.from(providedKey);
-  const expectedBuffer = Buffer.from(expectedKey);
-
-  if (
-    providedBuffer.length !== expectedBuffer.length ||
-    !crypto.timingSafeEqual(providedBuffer, expectedBuffer)
-  ) {
-    res.status(403).json({
+  if (!safeEqual(providedKey, expectedKey)) {
+    res.status(401).json({
       success: false,
       error: {
-        code: 'FORBIDDEN',
+        code: 'UNAUTHORIZED',
         message: 'Invalid admin key provided.',
       },
     });

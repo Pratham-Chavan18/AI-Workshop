@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import './helpers/mockPrisma';
 import request from 'supertest';
 import { app } from '../app';
-import { mockPrisma } from './helpers/mockPrisma';
+import { mockPrisma, mockDb, resetMockDb } from './helpers/mockPrisma';
 import { attributeReferral } from '../services/referral.service';
 import { registerStudent } from '../services/registration.service';
 
@@ -21,13 +21,13 @@ describe('Security Hardening & Negative Authorization Tests', () => {
       expect(res.body.error.code).toBe('UNAUTHORIZED');
     });
 
-    it('Negative: Non-admin or invalid admin key returns HTTP 403', async () => {
+    it('Negative: Non-admin or invalid admin key returns HTTP 401', async () => {
       const res = await request(app)
         .get('/api/v1/admin/campaigns/dummy-id/stats')
         .set('X-Admin-Key', 'attacker-key');
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(401);
       expect(res.body.success).toBe(false);
-      expect(res.body.error.code).toBe('FORBIDDEN');
+      expect(res.body.error.code).toBe('UNAUTHORIZED');
     });
 
     it('Negative: Client-provided role injection does not bypass admin gatekeeper', async () => {
@@ -40,6 +40,10 @@ describe('Security Hardening & Negative Authorization Tests', () => {
   });
 
   describe('2. Registration Security & PII Protection', () => {
+    beforeEach(() => {
+      resetMockDb();
+    });
+
     it('Negative: Malformed email or invalid input is rejected with HTTP 400', async () => {
       const res = await request(app)
         .post('/api/v1/registrations')
@@ -57,9 +61,11 @@ describe('Security Hardening & Negative Authorization Tests', () => {
 
     it('Negative: Duplicate registration attempt is blocked with HTTP 409', async () => {
       // Mock existing user in database
-      mockPrisma.user.findUnique.mockResolvedValueOnce({
+      mockDb.users.push({
         id: 'existing-user-id',
+        campaignId: 'test-campaign-id',
         emailNormalized: 'duplicate@student.edu',
+        referralCode: 'DUP123',
       });
 
       await expect(
