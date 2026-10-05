@@ -3,7 +3,7 @@ import { env } from '../config/env';
 
 export const registrationRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: env.NODE_ENV === 'development' ? 500 : 10, // Generous in dev, strict in production
+  max: env.NODE_ENV === 'development' || env.NODE_ENV === 'test' ? 500 : 10, // Generous in dev/test, strict in production
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -11,6 +11,26 @@ export const registrationRateLimiter = rateLimit({
     error: {
       code: 'RATE_LIMITED',
       message: 'Too many registration attempts from this IP. Please try again after 15 minutes.',
+    },
+  },
+});
+
+export const emailRegistrationRateLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: env.NODE_ENV === 'development' || env.NODE_ENV === 'test' ? 500 : 3, // 3 attempts per email per 10 minutes in prod
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const email = req.body?.email ? String(req.body.email).toLowerCase().trim() : '';
+    const phone = req.body?.phone ? String(req.body.phone).trim() : '';
+    return email || phone || req.ip || 'unknown';
+  },
+  validate: { xForwardedForHeader: false, default: false },
+  message: {
+    success: false,
+    error: {
+      code: 'RATE_LIMITED',
+      message: 'Too many registration attempts for this email. Please try again after 10 minutes.',
     },
   },
 });
