@@ -19,19 +19,15 @@ export const createApp = (): Application => {
   app.use(helmet());
 
   // CORS configuration
-  if (env.NODE_ENV === 'development' && !env.CORS_ORIGIN) {
+  if (env.NODE_ENV === 'development' && env.CORS_ORIGIN.length === 0) {
     logger.warn('CORS_ORIGIN is unset in development mode; defaulting allowed origins to ["http://localhost:5173"]');
   }
 
-  const configuredOrigins = env.CORS_ORIGIN
-    ? env.CORS_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean)
-    : [];
-
   const allowedOrigins =
     env.NODE_ENV === 'development'
-      ? Array.from(new Set([...configuredOrigins, 'http://localhost:5173']))
-      : configuredOrigins.length > 0
-        ? configuredOrigins
+      ? Array.from(new Set([...env.CORS_ORIGIN, 'http://localhost:5173']))
+      : env.CORS_ORIGIN.length > 0
+        ? env.CORS_ORIGIN
         : ['http://localhost:5173'];
 
   app.use(
