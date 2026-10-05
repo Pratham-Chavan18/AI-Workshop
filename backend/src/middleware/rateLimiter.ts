@@ -1,8 +1,9 @@
 import rateLimit from 'express-rate-limit';
+import { env } from '../config/env';
 
 export const registrationRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'development' ? 500 : 10, // Generous in dev, strict in production
+  max: env.NODE_ENV === 'development' ? 500 : 10, // Generous in dev, strict in production
   standardHeaders: true,
   legacyHeaders: false,
   message: {

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { ZodError } from 'zod';
 import { logger } from './logger';
 import { AppError } from '../utils/errors';
+import { env } from '../config/env';
 
 export { AppError };
 
@@ -42,7 +43,7 @@ export const errorHandler = (
     success: false,
     error: {
       code: 'INTERNAL_SERVER_ERROR',
-      message: process.env.NODE_ENV === 'production' ? 'An unexpected error occurred' : err.message,
+      message: env.NODE_ENV === 'production' ? 'An unexpected error occurred' : err.message,
     },
   });
 };

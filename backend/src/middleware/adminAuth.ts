@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import { logger } from './logger';
+import { env } from '../config/env';
 
 export const requireAdminKey = (req: Request, res: Response, next: NextFunction): void => {
   const providedKey = req.headers['x-admin-key'];
-  const expectedKey = process.env.ADMIN_API_KEY;
+  const expectedKey = process.env.ADMIN_API_KEY || env.ADMIN_API_KEY;
 
   if (!expectedKey) {
     logger.error('ADMIN_API_KEY environment variable is not configured');
