@@ -1,59 +1,59 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Sparkles, Trophy, UserPlus } from 'lucide-react';
+import { MarqueeStrip } from '@/components/slush/marquee-strip';
+import { Trophy, ArrowUpRight } from 'lucide-react';
 
 export const SiteHeader: React.FC = () => {
   const location = useLocation();
 
   return (
-    <motion.header
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="sticky top-0 z-50 w-full border-b border-border/80 bg-background/85 backdrop-blur-md"
-    >
+    <header className="sticky top-0 z-50 w-full bg-slush-paper border-b border-black">
+      {/* Top Marquee Announcement Band */}
+      <MarqueeStrip />
+
+      {/* Main Nav Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Logo and Wordmark */}
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-primary to-[#0091ff] flex items-center justify-center text-white shadow-sm glow-cobalt group-hover:scale-105 transition-transform">
-            <Sparkles className="w-5 h-5" />
+        {/* Slush Circular Brand Logo Mark */}
+        <Link to="/" className="flex items-center gap-3 group">
+          <div className="w-10 h-10 rounded-full border border-black bg-white flex items-center justify-center font-display font-extrabold text-xl text-black transition-transform group-hover:scale-105">
+            AI
           </div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-extrabold text-lg tracking-tight text-foreground">
-              AI Workshop
+          <div className="flex items-center gap-2">
+            <span className="font-display font-extrabold text-2xl tracking-tight text-black">
+              AI WORKSHOP
             </span>
-            <Badge variant="default" className="hidden sm:inline-flex text-[10px] py-0 px-2">
+            <span className="hidden sm:inline-block px-2.5 py-0.5 text-[11px] font-bold uppercase rounded-full bg-slush-mint border border-black text-black">
               NxtWave
-            </Badge>
+            </span>
           </div>
         </Link>
 
-        {/* Navigation links & CTAs */}
-        <nav className="flex items-center gap-3">
+        {/* Slush Pill Navigation Links & Filled CTA */}
+        <nav className="flex items-center gap-2 sm:gap-3">
           <Link to="/leaderboard">
-            <Button
-              variant={location.pathname === '/leaderboard' ? 'secondary' : 'ghost'}
-              size="sm"
-              className="hidden sm:inline-flex gap-1.5"
+            <button
+              className={`slush-pill px-4 py-2 text-xs sm:text-sm font-bold tracking-[0.03em] flex items-center gap-1.5 transition-colors ${
+                location.pathname === '/leaderboard'
+                  ? 'bg-slush-sunburst text-black'
+                  : 'bg-white text-black hover:bg-slush-mist'
+              }`}
             >
-              <Trophy className="w-4 h-4 text-amber-500" />
-              Leaderboard
-            </Button>
+              <Trophy className="w-4 h-4 text-black" />
+              <span>Campus Leaderboard</span>
+            </button>
           </Link>
 
           <Link to="/register">
-            <Button variant="primary" size="sm" className="gap-1.5">
-              <UserPlus className="w-4 h-4" />
+            <button className="slush-pill px-5 py-2 text-xs sm:text-sm font-bold tracking-[0.03em] bg-black text-white hover:bg-neutral-800 flex items-center gap-1.5 transition-all">
               <span>Register Free</span>
-            </Button>
+              <ArrowUpRight className="w-4 h-4" />
+            </button>
           </Link>
         </nav>
       </div>
-    </motion.header>
+    </header>
   );
 };
 
 export default SiteHeader;
+

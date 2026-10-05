@@ -1,8 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Award, Users } from 'lucide-react';
+import { Award } from 'lucide-react';
 
 interface ReferrerItem {
   rank: number;
@@ -33,96 +32,92 @@ export const ReferrerLeaderboard: React.FC = () => {
     if (r === 2) return <span className="text-2xl">🥈</span>;
     if (r === 3) return <span className="text-2xl">🥉</span>;
     return (
-      <span className="w-7 h-7 rounded-full bg-muted font-bold text-xs flex items-center justify-center text-muted-foreground">
+      <span className="w-8 h-8 rounded-full border border-black bg-slush-mist font-bold text-xs flex items-center justify-center text-black">
         #{r}
       </span>
     );
   };
 
   return (
-    <Card className="shadow-sm border-border overflow-hidden">
-      <CardHeader className="bg-canvas-soft border-b border-border/80 py-4">
-        <CardTitle className="text-lg font-bold flex items-center gap-2">
-          <Award className="w-5 h-5 text-amber-500" />
+    <div className="slush-card-elevated bg-white border border-black overflow-hidden shadow-none">
+      <div className="bg-slush-sunburst border-b border-black p-5 sm:p-6">
+        <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-black uppercase flex items-center gap-2">
+          <Award className="w-6 h-6 text-black" />
           Top Student Ambassadors
-        </CardTitle>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          Campus leaders driving peer registrations • Updated live
+        </h2>
+        <p className="text-xs sm:text-sm text-neutral-800 font-medium mt-1">
+          Campus leaders driving peer registrations • Updated live every 30s
         </p>
-      </CardHeader>
+      </div>
 
-      <CardContent className="p-0 overflow-x-auto">
+      <div className="p-0 overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-border bg-muted/40 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            <tr className="border-b border-black/10 bg-slush-mist/50 text-xs font-bold uppercase tracking-wide text-neutral-700">
               <th className="py-3 px-4 sm:px-6 w-16 text-center">Rank</th>
-              <th className="py-3 px-4 sm:px-6">Student Name</th>
+              <th className="py-3 px-4 sm:px-6">Student Ambassador</th>
               <th className="py-3 px-4 sm:px-6 hidden sm:table-cell">Campus</th>
-              <th className="py-3 px-4 sm:px-6 text-right">Friends Referred</th>
+              <th className="py-3 px-4 sm:px-6 text-right">Referrals Made</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-black/10">
             {isLoading ? (
-              Array.from({ length: 8 }).map((_, i) => (
-                <tr key={i} className="border-b border-border/40 animate-pulse">
-                  <td className="py-4 px-4 sm:px-6 text-center">
-                    <div className="w-7 h-7 bg-muted rounded-full mx-auto" />
+              [1, 2, 3, 4, 5].map((i) => (
+                <tr key={i} className="animate-pulse">
+                  <td className="py-4 px-6 text-center">
+                    <div className="w-6 h-6 rounded-full bg-slush-mist mx-auto"></div>
                   </td>
-                  <td className="py-4 px-4 sm:px-6">
-                    <div className="h-4 w-40 bg-muted rounded" />
+                  <td className="py-4 px-6">
+                    <div className="h-4 w-40 bg-slush-mist rounded"></div>
                   </td>
-                  <td className="py-4 px-4 sm:px-6 hidden sm:table-cell">
-                    <div className="h-4 w-48 bg-muted rounded" />
+                  <td className="py-4 px-6 hidden sm:table-cell">
+                    <div className="h-4 w-32 bg-slush-mist rounded"></div>
                   </td>
-                  <td className="py-4 px-4 sm:px-6 text-right">
-                    <div className="h-4 w-12 bg-muted rounded ml-auto" />
+                  <td className="py-4 px-6 text-right">
+                    <div className="h-4 w-8 bg-slush-mist rounded ml-auto"></div>
                   </td>
                 </tr>
               ))
             ) : items.length > 0 ? (
-              items.map((item) => (
+              items.map((ref) => (
                 <tr
-                  key={item.userId}
-                  className={`border-b border-border/60 hover:bg-muted/40 transition-colors ${
-                    item.rank <= 3 ? 'bg-amber-500/5 font-medium' : ''
+                  key={ref.userId}
+                  className={`border-b border-black/10 hover:bg-slush-mist/50 transition-colors ${
+                    ref.rank <= 3 ? 'bg-slush-sunburst/15' : ''
                   }`}
                 >
                   <td className="py-4 px-4 sm:px-6 text-center whitespace-nowrap">
-                    <div className="flex items-center justify-center w-8 mx-auto">
-                      {renderRankBadge(item.rank)}
+                    <div className="flex items-center justify-center">
+                      {renderRankBadge(ref.rank)}
                     </div>
                   </td>
                   <td className="py-4 px-4 sm:px-6">
-                    <span className="font-semibold text-sm sm:text-base text-foreground">
-                      {item.fullName}
-                    </span>
+                    <div className="font-bold text-sm sm:text-base text-black">
+                      {ref.fullName}
+                    </div>
                   </td>
-                  <td className="py-4 px-4 sm:px-6 text-xs sm:text-sm text-muted-foreground hidden sm:table-cell">
-                    {item.collegeName}
+                  <td className="py-4 px-4 sm:px-6 text-xs sm:text-sm text-neutral-600 hidden sm:table-cell font-medium">
+                    {ref.collegeName}
                   </td>
                   <td className="py-4 px-4 sm:px-6 text-right whitespace-nowrap">
-                    <span className="font-extrabold text-base sm:text-lg text-primary">
-                      {item.referralCount}
+                    <span className="font-display font-extrabold text-xl text-black">
+                      {ref.referralCount}
                     </span>
-                    <span className="text-xs text-muted-foreground ml-1">referrals</span>
+                    <span className="text-xs text-neutral-600 ml-1 font-bold">peers</span>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={4} className="py-12 text-center text-sm text-muted-foreground">
-                  <Users className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
-                  <p className="font-semibold text-foreground">No referrals recorded yet</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Refer your friends after registering to become the top ambassador!
-                  </p>
+                <td colSpan={4} className="py-12 text-center text-sm font-medium text-neutral-600">
+                  No student referrals recorded yet. Be the first ambassador!
                 </td>
               </tr>
             )}
           </tbody>
         </table>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

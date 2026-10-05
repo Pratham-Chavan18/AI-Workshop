@@ -1,8 +1,6 @@
 import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
+import { Sticker } from '@/components/slush/sticker';
 import { Trophy, Award, Target, Flame, CheckCircle2 } from 'lucide-react';
 
 export interface ReferralProgressCardProps {
@@ -47,102 +45,99 @@ export const ReferralProgressCard: React.FC<ReferralProgressCardProps> = ({
   };
 
   return (
-    <Card className="h-full border-border/80 bg-card/95 shadow-sm">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <Badge
-            variant={isAmbassador ? 'success' : 'default'}
-            className="text-xs uppercase font-bold tracking-wider"
-          >
-            {isAmbassador ? (
-              <>
-                <Award className="w-3.5 h-3.5 mr-1" />
-                Ambassador Unlocked
-              </>
-            ) : (
-              <>
-                <Target className="w-3.5 h-3.5 mr-1" />
-                Referral Challenge
-              </>
-            )}
-          </Badge>
+    <div className="slush-card h-full bg-white border border-black p-6 sm:p-8 flex flex-col justify-between shadow-none">
+      <div>
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <Sticker
+            color={isAmbassador ? 'mint' : 'voltage'}
+            icon={isAmbassador ? <Award className="w-3.5 h-3.5" /> : <Target className="w-3.5 h-3.5" />}
+            label={isAmbassador ? 'AMBASSADOR UNLOCKED' : 'CAMPUS CHALLENGE'}
+            size="sm"
+          />
 
           {campusRank && (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 text-xs font-bold border border-amber-500/20">
-              <Trophy className="w-3.5 h-3.5" />
+            <div className="slush-pill px-3 py-1 bg-slush-sunburst text-black text-xs font-bold flex items-center gap-1.5">
+              <Trophy className="w-3.5 h-3.5 text-black" />
               <span>Campus Rank #{campusRank}</span>
             </div>
           )}
         </div>
 
-        <CardTitle className="text-xl sm:text-2xl font-bold mt-2">
+        <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-black uppercase leading-none">
           Your Referral Progress
-        </CardTitle>
-        <CardDescription className="text-sm">
-          Track friends who registered through your link in real time.
-        </CardDescription>
-      </CardHeader>
+        </h2>
+        <p className="text-xs sm:text-sm text-neutral-600 font-medium mt-1">
+          Track classmates who joined using your link in real time.
+        </p>
 
-      <CardContent className="space-y-6">
         {/* Big Counter & Progress Bar */}
-        <div>
+        <div className="mt-6">
           <div className="flex items-baseline justify-between mb-2">
-            <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-extrabold text-foreground">{referralCount}</span>
-              <span className="text-lg font-semibold text-muted-foreground">/ {goal}</span>
-              <span className="text-xs text-muted-foreground ml-2">Friends Joined</span>
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-display font-extrabold text-5xl text-black">{referralCount}</span>
+              <span className="font-display font-extrabold text-2xl text-neutral-400">/ {goal}</span>
+              <span className="text-xs text-neutral-600 font-bold ml-1">Friends Joined</span>
             </div>
-            <span className="text-sm font-bold text-primary">{percentage}%</span>
+            <span className="font-display font-extrabold text-2xl text-black">{percentage}%</span>
           </div>
 
-          <Progress value={percentage} className="h-3" />
+          <div className="w-full h-4 bg-slush-mist border border-black rounded-full overflow-hidden p-0.5">
+            <div
+              style={{ width: `${percentage}%` }}
+              className="h-full bg-slush-mint rounded-full border-r border-black transition-all duration-500"
+            />
+          </div>
         </div>
 
         {/* Milestone Card */}
-        <div className={`p-4 rounded-2xl border ${
-          isAmbassador
-            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-300'
-            : 'bg-muted/50 border-border text-foreground'
+        <div className={`mt-6 p-4 rounded-[20px] border border-black ${
+          isAmbassador ? 'bg-slush-mint text-black' : 'bg-slush-lavender/60 text-black'
         }`}>
           <div className="flex items-start gap-3">
             {isAmbassador ? (
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-5 h-5 text-black shrink-0 mt-0.5" />
             ) : (
-              <Flame className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+              <Flame className="w-5 h-5 text-slush-ember shrink-0 mt-0.5" />
             )}
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Current Status
+              <p className="text-[11px] font-bold uppercase tracking-wider text-black">
+                Current Milestone Status
               </p>
-              <p className="text-sm font-medium mt-0.5 leading-snug">
+              <p className="text-sm font-semibold mt-0.5 leading-snug">
                 {getMilestoneMessage()}
               </p>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Perks Checklist */}
-        <div className="space-y-2 pt-2 border-t border-border/60">
-          <p className="text-xs font-bold text-foreground uppercase tracking-wider">
-            Ambassador Perks (3+ Referrals)
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5">
-              <span className={referralCount >= 1 ? 'text-emerald-500' : 'text-muted-foreground/50'}>✓</span>
-              <span>1 Referral: Campus Leaderboard Credit</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className={referralCount >= 2 ? 'text-emerald-500' : 'text-muted-foreground/50'}>✓</span>
-              <span>2 Referrals: AI Starter Codebase</span>
-            </div>
-            <div className="flex items-center gap-1.5 sm:col-span-2">
-              <span className={referralCount >= 3 ? 'text-emerald-500' : 'text-muted-foreground/50'}>✓</span>
-              <span className="font-semibold text-foreground">3 Referrals: Verified Ambassador Badge & Priority Q&A</span>
-            </div>
+      {/* Perks Checklist */}
+      <div className="space-y-2 pt-6 mt-6 border-t border-black/10">
+        <p className="text-xs font-bold text-black uppercase tracking-wider">
+          Ambassador Perks Checklist
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-semibold text-neutral-700">
+          <div className="flex items-center gap-1.5">
+            <span className={referralCount >= 1 ? 'text-black font-extrabold' : 'text-neutral-400'}>
+              {referralCount >= 1 ? '●' : '○'}
+            </span>
+            <span>1 Referral: Campus Leaderboard Credit</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className={referralCount >= 2 ? 'text-black font-extrabold' : 'text-neutral-400'}>
+              {referralCount >= 2 ? '●' : '○'}
+            </span>
+            <span>2 Referrals: AI Starter Codebase</span>
+          </div>
+          <div className="flex items-center gap-1.5 sm:col-span-2">
+            <span className={referralCount >= 3 ? 'text-black font-extrabold' : 'text-neutral-400'}>
+              {referralCount >= 3 ? '●' : '○'}
+            </span>
+            <span className="font-bold text-black">3 Referrals: Verified Ambassador Badge & Priority Q&A</span>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

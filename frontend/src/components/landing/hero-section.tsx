@@ -1,102 +1,150 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { AuroraBackground } from '@/components/ui/aurora-background';
-import { fadeUp } from '@/lib/motion';
-import { Sparkles, ArrowRight, Trophy, GraduationCap, CheckCircle2, Hammer, Briefcase } from 'lucide-react';
+import { Sticker } from '@/components/slush/sticker';
+import { Ribbon3D } from '@/components/slush/ribbon-3d';
+import { ArrowUpRight, Trophy, Sparkles, Rocket, Check, Award, Flame, Users } from 'lucide-react';
 
 export const HeroSection: React.FC = () => {
   return (
-    <AuroraBackground className="pt-20 pb-24 md:pt-28 md:pb-36 border-b border-border/60">
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        {/* Badge */}
-        <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          className="inline-flex items-center gap-1.5"
-        >
-          <Badge variant="default" className="px-4 py-1 text-xs uppercase tracking-wider font-bold">
-            <Sparkles className="w-3.5 h-3.5 mr-1.5 text-primary animate-pulse" />
-            Free Live AI Workshop
-          </Badge>
-        </motion.div>
+    <section className="relative w-full bg-slush-sky border-b border-black pt-12 pb-20 md:pt-16 md:pb-28 overflow-hidden">
+      {/* 3D Electric Blue Ribbon Wrapping Motif */}
+      <div className="absolute inset-0 flex items-center justify-center opacity-85 pointer-events-none z-0">
+        <Ribbon3D className="w-[140%] max-w-none transform -translate-y-8 md:-translate-y-4" />
+      </div>
 
-        {/* Main Headline */}
-        <motion.h1
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="mt-6 text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight text-foreground leading-[1.12]"
-        >
-          Build Your First <br />
-          <span className="text-gradient">AI Project in 60 Minutes</span>
-        </motion.h1>
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
+        {/* Floating Sticker Cluster (Top) */}
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-6">
+          <Sticker
+            color="mint"
+            icon={<Check className="w-3.5 h-3.5" />}
+            label="100% FREE WORKSHOP"
+            rotate={-2}
+            size="sm"
+          />
+          <Sticker
+            color="sunburst"
+            icon={<Award className="w-3.5 h-3.5" />}
+            label="FINAL-YEAR ENGINEERS"
+            rotate={3}
+            size="sm"
+          />
+          <Sticker
+            color="ember"
+            icon={<Flame className="w-3.5 h-3.5" />}
+            label="500 SEATS ONLY"
+            rotate={-1}
+            size="sm"
+          />
+        </div>
 
-        {/* Subtitle */}
+        {/* Sculptural Display Headline - Slush Lateral/Antonio 800 style */}
+        <div className="relative my-2 select-none">
+          {/* Decorative floating stickers pinned around headline */}
+          <div className="hidden lg:block absolute -top-8 -left-12 z-20">
+            <Sticker
+              color="ember"
+              icon={<Rocket className="w-4 h-4" />}
+              label="ROCKET SPEED"
+              rotate={-12}
+              size="md"
+            />
+          </div>
+
+          <div className="hidden lg:block absolute -top-6 -right-10 z-20">
+            <Sticker
+              color="voltage"
+              icon={<Sparkles className="w-4 h-4" />}
+              label="PORTFOLIO READY"
+              rotate={10}
+              size="md"
+            />
+          </div>
+
+          <div className="hidden lg:block absolute -bottom-4 -right-14 z-20">
+            <Sticker
+              color="sunburst"
+              icon={<Trophy className="w-4 h-4" />}
+              label="CAMPUS CUP"
+              rotate={-8}
+              size="md"
+            />
+          </div>
+
+          <motion.h1
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="text-sculptural text-black text-6xl sm:text-8xl md:text-9xl lg:text-[140px] tracking-tight leading-[0.80] drop-shadow-none"
+          >
+            BUILD IN
+            <br />
+            <span className="text-black">60 MINUTES</span>
+          </motion.h1>
+        </div>
+
+        {/* Tagline Subhead */}
         <motion.p
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mt-6 text-base sm:text-xl md:text-2xl font-medium text-black max-w-2xl mx-auto leading-tight"
         >
-          One hour. One real project. Zero cost. Designed exclusively for final-year engineering students to acquire immediate, portfolio-ready AI development skills.
+          One hour. One real AI project. Zero cost. Transform into a hands-on AI builder and lead your campus to #1 on the national leaderboard.
         </motion.p>
 
-        {/* CTA Buttons */}
+        {/* Pill Buttons: Black Filled Primary CTA + Outlined Ghost Button */}
         <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto"
         >
           <Link to="/register" className="w-full sm:w-auto">
-            <Button size="lg" variant="primary" className="w-full sm:w-auto text-base gap-2 px-8 py-6">
+            <button className="slush-pill w-full sm:w-auto px-8 py-3.5 bg-black text-white hover:bg-neutral-800 text-sm sm:text-base font-bold tracking-[0.032em] flex items-center justify-center gap-2 shadow-none transition-transform hover:-translate-y-0.5">
               <span>Reserve My Free Seat</span>
-              <ArrowRight className="w-5 h-5" />
-            </Button>
+              <ArrowUpRight className="w-5 h-5" />
+            </button>
           </Link>
 
           <Link to="/leaderboard" className="w-full sm:w-auto">
-            <Button size="lg" variant="outline" className="w-full sm:w-auto text-base gap-2 px-8 py-6">
-              <Trophy className="w-4 h-4 text-amber-500" />
+            <button className="slush-pill w-full sm:w-auto px-8 py-3.5 bg-white text-black hover:bg-slush-mist text-sm sm:text-base font-bold tracking-[0.032em] flex items-center justify-center gap-2 shadow-none transition-transform hover:-translate-y-0.5">
+              <Trophy className="w-4 h-4 text-black" />
               <span>Campus Leaderboard</span>
-            </Button>
+            </button>
           </Link>
         </motion.div>
 
-        {/* Social Proof Badges */}
+        {/* Social Proof Sticker Row */}
         <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="mt-12 pt-8 border-t border-border/40 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs sm:text-sm text-muted-foreground"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="mt-12 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm font-bold"
         >
-          <div className="flex items-center justify-center gap-2">
-            <GraduationCap className="w-4 h-4 text-primary" />
-            <span>500 Final-Year Engineers</span>
+          <div className="slush-pill px-3.5 py-1.5 bg-white text-black flex items-center gap-1.5">
+            <Users className="w-4 h-4 text-black" />
+            <span>500 Verified Engineers Only</span>
           </div>
-          <div className="flex items-center justify-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-            <span>Beginner Friendly</span>
+
+          <div className="slush-pill px-3.5 py-1.5 bg-slush-lavender text-black flex items-center gap-1.5">
+            <Sparkles className="w-4 h-4 text-black" />
+            <span>No Coding Pre-requisite</span>
           </div>
-          <div className="flex items-center justify-center gap-2">
-            <Hammer className="w-4 h-4 text-primary" />
-            <span>100% Live Hands-on Build</span>
+
+          <div className="slush-pill px-3.5 py-1.5 bg-slush-mint text-black flex items-center gap-1.5">
+            <Check className="w-4 h-4 text-black" />
+            <span>Live Interactive Guidance</span>
           </div>
-          <div className="flex items-center justify-center gap-2">
-            <Briefcase className="w-4 h-4 text-amber-500" />
-            <span>Resume & Portfolio Ready</span>
+
+          <div className="slush-pill px-3.5 py-1.5 bg-slush-sunburst text-black flex items-center gap-1.5">
+            <Award className="w-4 h-4 text-black" />
+            <span>Official Completion Certificate</span>
           </div>
         </motion.div>
       </div>
-    </AuroraBackground>
+    </section>
   );
 };
 

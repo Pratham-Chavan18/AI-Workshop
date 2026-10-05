@@ -7,10 +7,6 @@ import KPICards from '@/components/admin/kpi-cards';
 import RegistrationChart from '@/components/admin/registration-chart';
 import ReferralSourceTable from '@/components/admin/referral-source-table';
 import AmbassadorTable from '@/components/admin/ambassador-table';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Shield, KeyRound, Download, RefreshCw, LogOut, AlertCircle, Loader2 } from 'lucide-react';
 
 const ADMIN_STORAGE_KEY = 'ai_workshop_admin_api_key';
@@ -144,94 +140,95 @@ export const AdminPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-canvas text-ink antialiased">
+    <div className="min-h-screen flex flex-col bg-slush-concrete text-black antialiased">
       <SiteHeader />
 
       <main className="flex-1 py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         {/* If Not Authenticated: Show Key Gate Form */}
         {!adminKey ? (
           <div className="max-w-md mx-auto py-16">
-            <Card className="shadow-lg border-border/80 bg-card">
-              <CardHeader className="text-center pb-4">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mx-auto mb-3">
+            <div className="slush-card-elevated bg-white border border-black overflow-hidden shadow-none">
+              <div className="bg-slush-lavender border-b border-black p-6 text-center">
+                <div className="w-12 h-12 rounded-full border border-black bg-white flex items-center justify-center text-black mx-auto mb-3 font-bold">
                   <Shield className="w-6 h-6" />
                 </div>
-                <CardTitle className="text-2xl font-bold">Admin Operator Portal</CardTitle>
-                <CardDescription className="text-xs mt-1 text-muted-foreground">
+                <h1 className="font-display font-extrabold text-2xl sm:text-3xl text-black uppercase leading-tight">
+                  Admin Operator Portal
+                </h1>
+                <p className="text-xs sm:text-sm mt-1 text-neutral-700 font-medium">
                   Enter your secure X-Admin-Key to unlock real-time campaign performance analytics and data export.
-                </CardDescription>
-              </CardHeader>
+                </p>
+              </div>
 
-              <CardContent>
+              <div className="p-6 sm:p-8 bg-white">
                 <form onSubmit={handleLogin} className="space-y-4">
                   {authError && (
-                    <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-start gap-2 text-xs text-rose-600 font-medium">
+                    <div className="p-3 bg-slush-ember text-white border border-black rounded-[18px] flex items-start gap-2 text-xs font-bold">
                       <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                       <span>{authError}</span>
                     </div>
                   )}
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-foreground">
+                    <label className="text-xs font-bold text-black uppercase tracking-wider">
                       Admin API Key
                     </label>
                     <div className="relative">
-                      <Input
+                      <input
                         type="password"
                         value={keyInput}
                         onChange={(e) => setKeyInput(e.target.value)}
                         placeholder="Enter secure key (e.g. nxtwave-...)"
-                        className="pl-9 font-mono text-sm"
+                        className="w-full h-11 pl-10 pr-4 font-mono text-sm border border-black rounded-pill bg-white focus:outline-none focus:ring-2 focus:ring-slush-electric"
                         autoFocus
                       />
-                      <KeyRound className="w-4 h-4 text-muted-foreground absolute left-3 top-3.5" />
+                      <KeyRound className="w-4 h-4 text-black absolute left-3.5 top-3.5" />
                     </div>
                   </div>
 
-                  <Button type="submit" variant="primary" className="w-full h-11 text-sm font-semibold">
+                  <button
+                    type="submit"
+                    className="slush-pill w-full h-12 bg-black text-white hover:bg-neutral-800 text-sm font-bold tracking-[0.03em] flex items-center justify-center gap-2 transition-all mt-4"
+                  >
                     Authenticate & Access Dashboard
-                  </Button>
+                  </button>
                 </form>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         ) : (
           /* Authenticated Dashboard View */
           <div className="space-y-8">
             {/* Top Toolbar */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-border/80">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-black">
               <div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="default" className="text-[11px] font-bold">
+                  <span className="slush-pill px-3 py-0.5 bg-slush-mint text-black text-xs font-bold">
                     Campaign Live
-                  </Badge>
-                  <span className="text-xs text-muted-foreground font-mono">
+                  </span>
+                  <span className="text-xs text-neutral-600 font-mono font-bold">
                     ID: {campaignId || 'ai-workshop-active'}
                   </span>
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight mt-1">
-                  AI Workshop Campaign Command Center
+                <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-black uppercase tracking-tight mt-1">
+                  AI Workshop Command Center
                 </h1>
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  size="sm"
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <button
                   onClick={() => refetchStats()}
-                  className="gap-1.5 text-xs font-semibold"
+                  className="slush-pill px-4 py-2 bg-white text-black hover:bg-slush-mist text-xs font-bold flex items-center gap-1.5 transition-all"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                   <span>Refresh</span>
-                </Button>
+                </button>
 
-                <Button
-                  variant="primary"
-                  size="sm"
+                <button
                   onClick={handleExportCsv}
                   disabled={isExporting}
-                  className="gap-1.5 text-xs font-semibold bg-primary"
+                  className="slush-pill px-4 py-2 bg-slush-sunburst text-black hover:bg-slush-sunburst/80 text-xs font-bold flex items-center gap-1.5 transition-all disabled:opacity-50"
                 >
                   {isExporting ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -239,17 +236,15 @@ export const AdminPage: React.FC = () => {
                     <Download className="w-3.5 h-3.5" />
                   )}
                   <span>Export CSV</span>
-                </Button>
+                </button>
 
-                <Button
-                  variant="ghost"
-                  size="sm"
+                <button
                   onClick={handleLogout}
-                  className="text-xs text-muted-foreground hover:text-rose-500 gap-1"
+                  className="slush-pill px-4 py-2 bg-white text-black hover:bg-slush-ember hover:text-white text-xs font-bold flex items-center gap-1.5 transition-all"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>Logout</span>
-                </Button>
+                </button>
               </div>
             </div>
 

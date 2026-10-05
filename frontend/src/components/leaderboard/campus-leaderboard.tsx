@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { LeaderboardRow } from './leaderboard-row';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Building2, Search, Trophy } from 'lucide-react';
+import { Building2, Search } from 'lucide-react';
 
 interface CampusItem {
   rank: number;
@@ -40,87 +38,80 @@ export const CampusLeaderboard: React.FC = () => {
   );
 
   return (
-    <Card className="shadow-sm border-border overflow-hidden">
-      <CardHeader className="bg-canvas-soft border-b border-border/80 flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
+    <div className="slush-card-elevated bg-white border border-black overflow-hidden shadow-none">
+      <div className="bg-slush-lavender border-b border-black flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 sm:p-6">
         <div>
-          <CardTitle className="text-lg font-bold flex items-center gap-2">
-            <Building2 className="w-5 h-5 text-primary" />
-            National Engineering Campus Standings
-          </CardTitle>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-black uppercase flex items-center gap-2">
+            <Building2 className="w-6 h-6 text-black" />
+            National Campus Rankings
+          </h2>
+          <p className="text-xs sm:text-sm text-neutral-700 font-medium mt-1">
             Ranked by verified student registrations • Live auto-refresh every 30s
           </p>
         </div>
 
         {/* Filter Input */}
-        <div className="relative w-full sm:w-64">
-          <Input
+        <div className="relative w-full sm:w-72">
+          <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search your college..."
-            className="h-9 text-xs pl-8 bg-background"
+            className="w-full h-10 px-4 pl-9 text-xs sm:text-sm font-medium rounded-pill border border-black bg-white focus:outline-none focus:ring-2 focus:ring-slush-electric"
           />
-          <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-2.5 top-3" />
+          <Search className="w-4 h-4 text-black absolute left-3 top-3" />
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="p-0 overflow-x-auto">
+      <div className="p-0 overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-border bg-muted/40 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+            <tr className="border-b border-black/10 bg-slush-mist/50 text-xs font-bold uppercase tracking-wide text-neutral-700">
               <th className="py-3 px-4 sm:px-6 w-16 text-center">Rank</th>
               <th className="py-3 px-4 sm:px-6">Engineering College</th>
               <th className="py-3 px-4 sm:px-6 hidden sm:table-cell">Location</th>
               <th className="py-3 px-4 sm:px-6 text-right">Registrations</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-black/10">
             {isLoading ? (
-              // 10-row skeleton loading
-              Array.from({ length: 10 }).map((_, i) => (
-                <tr key={i} className="border-b border-border/40 animate-pulse">
-                  <td className="py-4 px-4 sm:px-6 text-center">
-                    <div className="w-7 h-7 bg-muted rounded-full mx-auto" />
+              [1, 2, 3, 4, 5, 6].map((i) => (
+                <tr key={i} className="animate-pulse">
+                  <td className="py-4 px-6 text-center">
+                    <div className="w-6 h-6 rounded-full bg-slush-mist mx-auto"></div>
                   </td>
-                  <td className="py-4 px-4 sm:px-6">
-                    <div className="h-4 w-48 sm:w-64 bg-muted rounded" />
+                  <td className="py-4 px-6">
+                    <div className="h-4 w-48 bg-slush-mist rounded"></div>
                   </td>
-                  <td className="py-4 px-4 sm:px-6 hidden sm:table-cell">
-                    <div className="h-4 w-28 bg-muted rounded" />
+                  <td className="py-4 px-6 hidden sm:table-cell">
+                    <div className="h-4 w-24 bg-slush-mist rounded"></div>
                   </td>
-                  <td className="py-4 px-4 sm:px-6 text-right">
-                    <div className="h-4 w-12 bg-muted rounded ml-auto" />
+                  <td className="py-4 px-6 text-right">
+                    <div className="h-4 w-12 bg-slush-mist rounded ml-auto"></div>
                   </td>
                 </tr>
               ))
             ) : filteredItems.length > 0 ? (
-              filteredItems.map((item) => (
+              filteredItems.map((campus) => (
                 <LeaderboardRow
-                  key={item.collegeId}
-                  rank={item.rank}
-                  collegeName={item.collegeName}
-                  city={item.city}
-                  state={item.state}
-                  registrations={item.registrations}
+                  key={campus.collegeId}
+                  rank={campus.rank}
+                  collegeName={campus.collegeName}
+                  city={campus.city}
+                  state={campus.state}
+                  registrations={campus.registrations}
                 />
               ))
             ) : (
               <tr>
-                <td colSpan={4} className="py-12 text-center text-sm text-muted-foreground">
-                  <Trophy className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
-                  <p className="font-semibold text-foreground">
-                    {search ? 'No matching college found' : 'No registrations yet'}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {search ? 'Try clearing your search query.' : 'Be the first from your campus to register!'}
-                  </p>
+                <td colSpan={4} className="py-12 text-center text-sm font-medium text-neutral-600">
+                  {search ? 'No colleges found matching your search.' : 'No colleges have registered yet.'}
                 </td>
               </tr>
             )}
           </tbody>
         </table>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

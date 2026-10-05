@@ -1,11 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Card, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { fadeUp, viewportOnce } from '@/lib/motion';
-import { Share2, Users2, Trophy, ArrowRight, CheckCheck } from 'lucide-react';
+import { Sticker } from '@/components/slush/sticker';
+import { Share2, Users2, Trophy, ArrowUpRight, CheckCheck } from 'lucide-react';
 
 const STEPS = [
   {
@@ -13,62 +10,75 @@ const STEPS = [
     icon: CheckCheck,
     title: 'Register in 10 Seconds',
     description: 'Fill in your name, college, and email. Instantly receive your unique campus referral link.',
+    color: 'lavender' as const,
+    badgeBg: 'bg-slush-lavender',
   },
   {
     step: '02',
     icon: Share2,
     title: 'Share with Batchmates',
-    description: '1-click share to your WhatsApp groups, Discord servers, and LinkedIn network.',
+    description: '1-click share to your WhatsApp batch groups, Discord coding servers, and LinkedIn network.',
+    color: 'mint' as const,
+    badgeBg: 'bg-slush-mint',
   },
   {
     step: '03',
     icon: Trophy,
     title: 'Climb the Leaderboard',
-    description: 'Every peer who registers through your link credits you and catapults your college to #1.',
+    description: 'Every classmate who signs up catapults your college to #1 on the national leaderboard.',
+    color: 'sunburst' as const,
+    badgeBg: 'bg-slush-sunburst',
   },
 ];
 
 export const ReferralSection: React.FC = () => {
   return (
-    <section className="py-20 md:py-28 bg-canvas-soft border-t border-border/80">
+    <section className="py-20 md:py-28 bg-slush-paper border-b border-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto">
-          <Badge variant="default" className="text-xs uppercase font-bold tracking-wider">
-            <Users2 className="w-3.5 h-3.5 mr-1" />
-            Viral Campus Referral Loop
-          </Badge>
-          <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+          <Sticker
+            color="voltage"
+            icon={<Users2 className="w-3.5 h-3.5" />}
+            label="VIRAL CAMPUS LOOP"
+            className="mb-4"
+          />
+          <h2 className="text-4xl sm:text-6xl font-extrabold font-display tracking-tight text-black uppercase leading-tight">
             The Campus Referral Challenge
           </h2>
-          <p className="mt-4 text-base text-muted-foreground">
-            Help your college reach the top 5 nationwide. Students who refer 3+ peers unlock priority Q&A slots and bonus AI project templates.
+          <p className="mt-4 text-base sm:text-lg text-neutral-700 font-medium">
+            Represent your engineering college. Students who invite 3+ peers unlock verified certificates, priority build reviews, and campus glory.
           </p>
         </div>
 
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Slush 3-Column Sticker Cards */}
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
           {STEPS.map((s, idx) => {
             const Icon = s.icon;
             return (
               <motion.div
                 key={idx}
-                variants={fadeUp}
-                initial="hidden"
-                whileInView="visible"
-                viewport={viewportOnce}
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: idx * 0.1 }}
+                className="slush-card p-8 bg-white border border-black flex flex-col justify-between hover:bg-neutral-50 transition-colors relative"
               >
-                <Card className="h-full border-border/80 bg-card p-6 rounded-card relative overflow-hidden group hover:border-primary/50 transition-all shadow-xs">
-                  <div className="text-5xl font-black text-muted-foreground/15 absolute right-4 top-4 select-none group-hover:text-primary/15 transition-colors">
-                    {s.step}
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className={`w-12 h-12 rounded-[18px] border border-black ${s.badgeBg} flex items-center justify-center text-black font-bold`}>
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <span className="font-display font-extrabold text-3xl text-neutral-400">
+                      #{s.step}
+                    </span>
                   </div>
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary mb-5 group-hover:scale-110 transition-transform">
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <CardTitle className="text-xl font-bold">{s.title}</CardTitle>
-                  <CardDescription className="text-sm mt-2 leading-relaxed">
+                  <h3 className="font-display font-extrabold text-2xl sm:text-3xl text-black uppercase leading-none mb-3">
+                    {s.title}
+                  </h3>
+                  <p className="text-sm sm:text-base text-neutral-600 font-medium leading-relaxed">
                     {s.description}
-                  </CardDescription>
-                </Card>
+                  </p>
+                </div>
               </motion.div>
             );
           })}
@@ -76,10 +86,10 @@ export const ReferralSection: React.FC = () => {
 
         <div className="mt-12 text-center">
           <Link to="/register">
-            <Button size="lg" variant="primary" className="gap-2 px-8">
-              <span>Join the Challenge & Get Your Link</span>
-              <ArrowRight className="w-4 h-4" />
-            </Button>
+            <button className="slush-pill px-8 py-3.5 bg-black text-white hover:bg-neutral-800 text-sm sm:text-base font-bold tracking-[0.032em] inline-flex items-center gap-2 shadow-none transition-transform hover:-translate-y-0.5">
+              <span>Join Challenge & Get Your Link</span>
+              <ArrowUpRight className="w-5 h-5" />
+            </button>
           </Link>
         </div>
       </div>

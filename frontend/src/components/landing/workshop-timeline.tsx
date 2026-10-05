@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Badge } from '@/components/ui/badge';
-import { fadeUp, viewportOnce } from '@/lib/motion';
+import { Sticker } from '@/components/slush/sticker';
 import { Clock, Terminal, Bot, Sparkles, Rocket, MessageSquareCode } from 'lucide-react';
 
 const AGENDA_ITEMS = [
@@ -12,6 +11,7 @@ const AGENDA_ITEMS = [
     title: 'Architecture Blueprint & Workspace Spin-Up',
     description:
       'Understand how production AI apps work. Spin up your development workspace, configure environment keys, and initialize the boilerplate.',
+    stickerColor: 'mint' as const,
   },
   {
     time: '00:10 – 00:30',
@@ -20,6 +20,7 @@ const AGENDA_ITEMS = [
     title: 'Core AI Engine & LLM Integration',
     description:
       'Connect to frontier AI models via streaming APIs. Write prompt pipelines that process user inputs and generate structured outputs in real-time.',
+    stickerColor: 'sunburst' as const,
   },
   {
     time: '00:30 – 00:45',
@@ -28,6 +29,7 @@ const AGENDA_ITEMS = [
     title: 'Modern UI & Interactive State Layer',
     description:
       'Wire the AI streaming responses into a sleek, responsive user interface with optimistic updates, markdown rendering, and error boundaries.',
+    stickerColor: 'lavender' as const,
   },
   {
     time: '00:45 – 00:55',
@@ -36,6 +38,7 @@ const AGENDA_ITEMS = [
     title: 'Live Cloud Deployment & Custom Domain',
     description:
       'Ship your full-stack AI application live to the web. Get a publicly accessible URL ready to paste on your resume and GitHub.',
+    stickerColor: 'ember' as const,
   },
   {
     time: '00:55 – 01:00',
@@ -44,58 +47,60 @@ const AGENDA_ITEMS = [
     title: 'Live Q&A & Interview Portfolio Strategies',
     description:
       'Tips on presenting this project during technical interviews, open-floor questions with senior AI engineers, and certificate issuance.',
+    stickerColor: 'voltage' as const,
   },
 ];
 
 export const WorkshopTimeline: React.FC = () => {
   return (
-    <section className="py-20 md:py-28 bg-canvas-soft border-y border-border/80">
+    <section className="py-20 md:py-28 bg-slush-concrete border-b border-black">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto">
-          <Badge variant="default" className="text-xs uppercase font-bold tracking-wider">
-            <Clock className="w-3.5 h-3.5 mr-1" />
-            60-Minute Fast Track
-          </Badge>
-          <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
-            Minute-by-Minute Masterclass Agenda
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <Sticker
+            color="mint"
+            icon={<Clock className="w-3.5 h-3.5" />}
+            label="60-MINUTE ROADMAP"
+            className="mb-4"
+          />
+          <h2 className="text-4xl sm:text-6xl font-extrabold font-display tracking-tight text-black uppercase leading-tight">
+            Minute-by-Minute Masterclass
           </h2>
-          <p className="mt-4 text-base text-muted-foreground">
-            Every minute is optimized so you exit the workshop with a live, functioning AI product.
+          <p className="mt-4 text-base sm:text-lg text-neutral-800 font-medium">
+            Every single minute is engineered so you walk away with a functional, deployed AI web product.
           </p>
         </div>
 
-        {/* Timeline list */}
-        <div className="mt-16 space-y-6">
+        {/* Slush Timeline Cards on Concrete Gray */}
+        <div className="space-y-4">
           {AGENDA_ITEMS.map((item, idx) => {
             const Icon = item.icon;
             return (
               <motion.div
                 key={idx}
-                variants={fadeUp}
-                initial="hidden"
-                whileInView="visible"
-                viewport={viewportOnce}
-                transition={{ duration: 0.4, delay: idx * 0.08 }}
-                className="relative pl-8 sm:pl-10 before:absolute before:left-3.5 sm:before:left-4 before:top-3 before:bottom-0 before:w-0.5 before:bg-border last:before:hidden group"
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.35, delay: idx * 0.08 }}
+                className="slush-card p-6 bg-white border border-black flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:bg-neutral-50 transition-colors"
               >
-                {/* Timeline node icon */}
-                <div className="absolute left-0 top-1.5 w-7 sm:w-8 h-7 sm:h-8 rounded-full bg-primary/10 border-2 border-primary flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                  <Icon className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
-                </div>
-
-                <div className="bg-card border border-border/90 rounded-2xl p-5 sm:p-6 shadow-xs group-hover:border-primary/40 transition-colors">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-xs font-mono font-semibold text-primary uppercase tracking-wider">
-                      {item.time}
-                    </span>
-                    <Badge variant="secondary" className="text-[11px] font-medium">
-                      {item.duration}
-                    </Badge>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-[18px] border border-black bg-slush-sky flex items-center justify-center text-black shrink-0 font-bold">
+                    <Icon className="w-6 h-6" />
                   </div>
-                  <h3 className="text-lg font-bold text-foreground mt-2">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
-                    {item.description}
-                  </p>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <span className="slush-pill px-2.5 py-0.5 text-xs font-bold bg-black text-white">
+                        {item.time}
+                      </span>
+                      <Sticker color={item.stickerColor} label={item.duration} size="sm" />
+                    </div>
+                    <h3 className="font-display font-extrabold text-xl sm:text-2xl text-black uppercase">
+                      {item.title}
+                    </h3>
+                    <p className="text-sm text-neutral-700 font-medium mt-1 leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
                 </div>
               </motion.div>
             );

@@ -4,26 +4,26 @@ import { motion, HTMLMotionProps } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 export const buttonVariants = cva(
-  'inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer',
+  'inline-flex items-center justify-center font-bold tracking-[0.03em] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4da2ff] disabled:pointer-events-none disabled:opacity-50 select-none cursor-pointer',
   {
     variants: {
       variant: {
         primary:
-          'bg-primary text-white hover:bg-[#0457cb] active:bg-[#0344a1] shadow-sm glow-cobalt rounded-pill',
+          'bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 border border-black rounded-pill shadow-none',
         secondary:
-          'bg-secondary text-secondary-foreground hover:bg-muted active:bg-hairline rounded-pill border border-border',
+          'bg-white text-black hover:bg-slush-mist active:bg-neutral-200 border border-black rounded-pill shadow-none',
         outline:
-          'border border-primary text-primary bg-transparent hover:bg-primary/10 active:bg-primary/20 rounded-pill',
+          'bg-white text-black hover:bg-slush-mist active:bg-neutral-200 border border-black rounded-pill shadow-none',
         ghost:
-          'text-primary hover:bg-primary/10 active:bg-primary/20 rounded-pill',
+          'bg-transparent text-black hover:bg-slush-mist active:bg-neutral-200 rounded-pill border border-transparent hover:border-black',
         destructive:
-          'bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-pill shadow-sm',
+          'bg-slush-ember text-white hover:bg-red-600 active:bg-red-700 border border-black rounded-pill shadow-none',
       },
       size: {
         default: 'h-11 px-6 py-2 text-sm',
         sm: 'h-9 px-4 text-xs',
-        lg: 'h-13 px-8 text-base font-semibold',
-        icon: 'h-10 w-10 p-0 rounded-full',
+        lg: 'h-13 px-8 text-base font-bold',
+        icon: 'h-10 w-10 p-0 rounded-full border border-black',
       },
     },
     defaultVariants: {
@@ -44,9 +44,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <motion.button
         ref={ref}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+        whileHover={{ y: -1 }}
+        whileTap={{ y: 1 }}
+        transition={{ duration: 0.1 }}
         className={cn(buttonVariants({ variant, size, className }))}
         {...props}
       >

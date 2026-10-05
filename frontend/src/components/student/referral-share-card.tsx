@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Sticker } from '@/components/slush/sticker';
 import { Share2, Copy, Check, MessageCircle } from 'lucide-react';
 
 export interface ReferralShareCardProps {
@@ -39,108 +37,84 @@ export const ReferralShareCard: React.FC<ReferralShareCardProps> = ({
   const whatsappUrl = `https://wa.me/?text=${whatsappMessage}`;
 
   return (
-    <Card className="h-full border-border/80 bg-card/95 shadow-sm">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <Badge variant="default" className="text-xs uppercase font-bold tracking-wider">
-            <Share2 className="w-3.5 h-3.5 mr-1" />
-            Your Referral Hub
-          </Badge>
-          <span className="text-xs text-muted-foreground font-medium">
-            Progress: {referralCount} / {goal} Friends
+    <div className="slush-card h-full bg-white border border-black p-6 sm:p-8 flex flex-col justify-between shadow-none">
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <Sticker
+            color="sunburst"
+            icon={<Share2 className="w-3.5 h-3.5" />}
+            label="YOUR REFERRAL HUB"
+            size="sm"
+          />
+          <span className="text-xs font-bold text-neutral-600">
+            {referralCount} / {goal} Friends Credited
           </span>
         </div>
-        <CardTitle className="text-xl sm:text-2xl font-bold mt-2">
-          Invite Your Campus Friends
-        </CardTitle>
-        <CardDescription className="text-sm">
-          Share your custom referral code or direct link across WhatsApp and social channels.
-        </CardDescription>
-      </CardHeader>
 
-      <CardContent className="space-y-5">
-        {/* Referral Code Display Box */}
-        <div className="p-4 bg-muted/60 border border-border rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+        <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-black uppercase leading-none">
+          Invite Your Campus Friends
+        </h2>
+        <p className="text-xs sm:text-sm text-neutral-600 font-medium mt-1">
+          Share your custom referral code or direct link to credit your student profile.
+        </p>
+
+        {/* Display Code Box */}
+        <div className="mt-6 p-4 rounded-[20px] border border-black bg-slush-sky/60 flex items-center justify-between">
           <div>
-            <span className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-700">
               Your Unique Referral Code
             </span>
-            <div className="font-mono text-3xl font-extrabold text-primary tracking-widest mt-0.5">
+            <p className="font-display font-extrabold text-3xl text-black tracking-wider leading-none mt-1">
               {referralCode}
-            </div>
+            </p>
           </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
+          <button
             onClick={handleCopy}
-            className={`gap-1.5 transition-all text-xs font-semibold ${
-              copied ? 'border-emerald-500 text-emerald-600 bg-emerald-50' : ''
-            }`}
+            className="slush-pill px-4 py-2 bg-white text-black hover:bg-slush-mist text-xs font-bold flex items-center gap-1.5 transition-all"
           >
-            {copied ? (
-              <>
-                <Check className="w-4 h-4 text-emerald-600" />
-                <span>Copied!</span>
-              </>
-            ) : (
-              <>
-                <Copy className="w-4 h-4" />
-                <span>Copy Link</span>
-              </>
-            )}
-          </Button>
+            {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+            <span>{copied ? 'Copied!' : 'Copy Code'}</span>
+          </button>
         </div>
 
-        {/* Action Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-          {/* WhatsApp Share CTA */}
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-testid="whatsapp-share-btn"
-            className="w-full inline-block"
-          >
-            <Button
-              type="button"
-              variant="primary"
-              className="w-full gap-2 bg-[#25D366] hover:bg-[#1EBE5D] text-white py-6 shadow-sm border-0"
+        {/* Link Copy Box */}
+        <div className="mt-4">
+          <label className="text-xs font-bold text-black uppercase tracking-wider block mb-1">
+            Direct Shareable URL
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              readOnly
+              value={referralUrl}
+              className="flex-1 h-11 px-4 text-xs font-mono bg-slush-mist/50 border border-black rounded-pill text-black select-all focus:outline-none"
+            />
+            <button
+              onClick={handleCopy}
+              className="slush-pill h-11 px-5 bg-black text-white hover:bg-neutral-800 text-xs font-bold shrink-0 flex items-center gap-1.5"
             >
-              <MessageCircle className="w-5 h-5 fill-white text-white" />
-              <span>Invite on WhatsApp</span>
-            </Button>
-          </a>
-
-          {/* Copy Direct Link Button */}
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleCopy}
-            className="w-full gap-2 py-6 text-foreground font-semibold"
-          >
-            {copied ? (
-              <>
-                <Check className="w-5 h-5 text-emerald-500" />
-                <span className="text-emerald-600">Link Copied!</span>
-              </>
-            ) : (
-              <>
-                <Copy className="w-5 h-5" />
-                <span>Copy Referral URL</span>
-              </>
-            )}
-          </Button>
+              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              <span>{copied ? 'Copied' : 'Copy Link'}</span>
+            </button>
+          </div>
         </div>
+      </div>
 
-        {/* Link preview hint */}
-        <p className="text-[11px] text-muted-foreground truncate bg-canvas-soft p-2.5 rounded-lg border border-border/60">
-          <span className="font-semibold text-foreground">Your Link: </span>
-          {referralUrl}
-        </p>
-      </CardContent>
-    </Card>
+      {/* 1-Click WhatsApp Share Button */}
+      <div className="pt-6 mt-6 border-t border-black/10">
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block w-full"
+        >
+          <button className="slush-pill w-full py-3.5 bg-slush-mint text-black hover:bg-slush-mint/80 text-sm font-bold flex items-center justify-center gap-2 shadow-none transition-transform hover:-translate-y-0.5">
+            <MessageCircle className="w-5 h-5" />
+            <span>Share to WhatsApp Groups (1-Click)</span>
+          </button>
+        </a>
+      </div>
+    </div>
   );
 };
 

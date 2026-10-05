@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { fadeUp } from '@/lib/motion';
 
 export interface LeaderboardRowProps {
   rank: number;
@@ -24,7 +23,7 @@ export const LeaderboardRow: React.FC<LeaderboardRowProps> = ({
     if (r === 2) return <span className="text-2xl">🥈</span>;
     if (r === 3) return <span className="text-2xl">🥉</span>;
     return (
-      <span className="w-7 h-7 rounded-full bg-muted font-bold text-xs flex items-center justify-center text-muted-foreground">
+      <span className="w-8 h-8 rounded-full border border-black bg-slush-mist font-bold text-xs flex items-center justify-center text-black">
         #{r}
       </span>
     );
@@ -32,12 +31,10 @@ export const LeaderboardRow: React.FC<LeaderboardRowProps> = ({
 
   return (
     <motion.tr
-      variants={fadeUp}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true }}
-      className={`border-b border-border/60 hover:bg-muted/40 transition-colors ${
-        isTopThree ? 'bg-primary/5 font-medium' : ''
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className={`border-b border-black/10 hover:bg-slush-mist/50 transition-colors ${
+        isTopThree ? 'bg-slush-lavender/20' : ''
       }`}
     >
       <td className="py-4 px-4 sm:px-6 whitespace-nowrap">
@@ -46,18 +43,18 @@ export const LeaderboardRow: React.FC<LeaderboardRowProps> = ({
         </div>
       </td>
       <td className="py-4 px-4 sm:px-6">
-        <div className="font-semibold text-sm sm:text-base text-foreground">
+        <div className="font-bold text-sm sm:text-base text-black">
           {collegeName}
         </div>
       </td>
-      <td className="py-4 px-4 sm:px-6 text-xs sm:text-sm text-muted-foreground hidden sm:table-cell">
+      <td className="py-4 px-4 sm:px-6 text-xs sm:text-sm text-neutral-600 hidden sm:table-cell font-medium">
         {[city, state].filter(Boolean).join(', ') || '—'}
       </td>
       <td className="py-4 px-4 sm:px-6 text-right whitespace-nowrap">
-        <span className="font-extrabold text-base sm:text-lg text-primary">
+        <span className="font-display font-extrabold text-xl text-black">
           {registrations}
         </span>
-        <span className="text-xs text-muted-foreground ml-1 hidden xs:inline">students</span>
+        <span className="text-xs text-neutral-600 ml-1 font-bold">students</span>
       </td>
     </motion.tr>
   );

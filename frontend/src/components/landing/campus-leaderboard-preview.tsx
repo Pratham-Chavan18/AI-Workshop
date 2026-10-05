@@ -3,11 +3,8 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { api } from '@/lib/api';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { fadeUp, viewportOnce } from '@/lib/motion';
-import { Trophy, ArrowRight, Building2, Flame } from 'lucide-react';
+import { Sticker } from '@/components/slush/sticker';
+import { Trophy, ArrowUpRight, Flame, Building2 } from 'lucide-react';
 
 interface CampusItem {
   rank: number;
@@ -37,121 +34,120 @@ export const CampusLeaderboardPreview: React.FC = () => {
   const totalRegistrations = data?.total || 0;
 
   const renderRankBadge = (rank: number) => {
-    if (rank === 1) return <span className="text-xl">🥇</span>;
-    if (rank === 2) return <span className="text-xl">🥈</span>;
-    if (rank === 3) return <span className="text-xl">🥉</span>;
+    if (rank === 1) return <span className="text-2xl">🥇</span>;
+    if (rank === 2) return <span className="text-2xl">🥈</span>;
+    if (rank === 3) return <span className="text-2xl">🥉</span>;
     return (
-      <span className="w-6 h-6 rounded-full bg-muted font-bold text-xs flex items-center justify-center text-muted-foreground">
+      <span className="w-8 h-8 rounded-full border border-black bg-slush-mist font-bold text-xs flex items-center justify-center text-black">
         #{rank}
       </span>
     );
   };
 
   return (
-    <section className="py-20 md:py-28 bg-canvas">
+    <section className="py-20 md:py-28 bg-slush-sky border-b border-black">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto">
-          <Badge variant="default" className="text-xs uppercase font-bold tracking-wider">
-            <Trophy className="w-3.5 h-3.5 mr-1 text-amber-500" />
-            Live National Standings
-          </Badge>
-          <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <Sticker
+            color="sunburst"
+            icon={<Trophy className="w-3.5 h-3.5" />}
+            label="LIVE CAMPUS STANDINGS"
+            className="mb-4"
+          />
+          <h2 className="text-4xl sm:text-6xl font-extrabold font-display tracking-tight text-black uppercase leading-tight">
             Campus Leaderboard Preview
           </h2>
-          <p className="mt-4 text-base text-muted-foreground">
+          <p className="mt-4 text-base sm:text-lg text-neutral-800 font-medium">
             Colleges across India are rallying their final-year batches. Which college will dominate the top spot?
           </p>
         </div>
 
         <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewportOnce}
-          className="mt-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4 }}
+          className="slush-card-elevated bg-white border border-black overflow-hidden"
         >
-          <Card className="shadow-sm border-border overflow-hidden">
-            <CardHeader className="bg-canvas-soft border-b border-border/80 flex flex-row items-center justify-between py-4">
-              <div>
-                <CardTitle className="text-base font-bold flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-primary" />
-                  Top Engineering Campuses
-                </CardTitle>
-                <CardDescription className="text-xs">
-                  Updated live every 30 seconds
-                </CardDescription>
+          {/* Header */}
+          <div className="bg-slush-lavender border-b border-black p-5 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-black" />
+              <span className="font-display font-extrabold text-xl text-black uppercase">
+                Top Engineering Campuses
+              </span>
+            </div>
+            {totalRegistrations > 0 && (
+              <div className="slush-pill px-3 py-1 bg-white text-black text-xs font-bold flex items-center gap-1.5">
+                <Flame className="w-3.5 h-3.5 text-slush-ember" />
+                <span>{totalRegistrations} Registrations Nationwide</span>
               </div>
-              {totalRegistrations > 0 && (
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold">
-                  <Flame className="w-3.5 h-3.5 fill-primary" />
-                  <span>{totalRegistrations} Registered Nationwide</span>
-                </div>
-              )}
-            </CardHeader>
+            )}
+          </div>
 
-            <CardContent className="p-0 divide-y divide-border/60">
-              {isLoading ? (
-                // Loading Skeleton
-                <div className="p-6 space-y-4">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="flex items-center justify-between animate-pulse">
-                      <div className="flex items-center gap-4">
-                        <div className="w-8 h-8 rounded-full bg-muted"></div>
-                        <div className="h-4 w-48 bg-muted rounded"></div>
-                      </div>
-                      <div className="h-4 w-12 bg-muted rounded"></div>
+          {/* List Content */}
+          <div className="p-0 divide-y divide-black/10">
+            {isLoading ? (
+              <div className="p-8 space-y-4">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="flex items-center justify-between animate-pulse">
+                    <div className="flex items-center gap-4">
+                      <div className="w-8 h-8 rounded-full bg-slush-mist"></div>
+                      <div className="h-4 w-48 bg-slush-mist rounded"></div>
                     </div>
-                  ))}
-                </div>
-              ) : topCampuses.length > 0 ? (
-                topCampuses.map((campus) => (
-                  <div
-                    key={campus.collegeId}
-                    className="flex items-center justify-between p-4 sm:px-6 hover:bg-muted/40 transition-colors"
-                  >
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      <div className="w-7 flex items-center justify-center shrink-0">
-                        {renderRankBadge(campus.rank)}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-semibold text-sm sm:text-base text-foreground truncate">
-                          {campus.collegeName}
+                    <div className="h-4 w-12 bg-slush-mist rounded"></div>
+                  </div>
+                ))}
+              </div>
+            ) : topCampuses.length > 0 ? (
+              topCampuses.map((campus) => (
+                <div
+                  key={campus.collegeId}
+                  className="flex items-center justify-between p-4 sm:px-6 hover:bg-slush-mist/50 transition-colors"
+                >
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="w-8 flex items-center justify-center shrink-0">
+                      {renderRankBadge(campus.rank)}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-sm sm:text-base text-black truncate">
+                        {campus.collegeName}
+                      </p>
+                      {(campus.city || campus.state) && (
+                        <p className="text-xs text-neutral-600 truncate font-medium">
+                          {[campus.city, campus.state].filter(Boolean).join(', ')}
                         </p>
-                        {(campus.city || campus.state) && (
-                          <p className="text-xs text-muted-foreground truncate">
-                            {[campus.city, campus.state].filter(Boolean).join(', ')}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="text-right shrink-0 ml-4">
-                      <span className="font-extrabold text-sm sm:text-base text-primary">
-                        {campus.registrations}
-                      </span>
-                      <span className="text-xs text-muted-foreground ml-1">students</span>
+                      )}
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className="p-8 text-center text-sm text-muted-foreground">
-                  <p>Be the first from your college to register and put your campus on the leaderboard!</p>
-                </div>
-              )}
-            </CardContent>
 
-            <CardFooter className="bg-canvas-soft/80 border-t border-border/80 flex items-center justify-between p-4">
-              <span className="text-xs text-muted-foreground">
-                Represent your campus in the AI Workshop challenge
-              </span>
-              <Link to="/leaderboard">
-                <Button variant="ghost" size="sm" className="gap-1 text-primary hover:text-primary-deep text-xs font-semibold">
-                  <span>View Full Leaderboard</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Button>
-              </Link>
-            </CardFooter>
-          </Card>
+                  <div className="text-right shrink-0 ml-4">
+                    <span className="font-display font-extrabold text-xl text-black">
+                      {campus.registrations}
+                    </span>
+                    <span className="text-xs text-neutral-600 ml-1 font-bold">students</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-8 text-center text-sm font-medium text-neutral-600">
+                <p>Be the first from your college to register and put your campus on the leaderboard!</p>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="bg-slush-mist/60 border-t border-black p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <span className="text-xs font-semibold text-neutral-700">
+              Represent your campus in the AI Workshop challenge
+            </span>
+            <Link to="/leaderboard">
+              <button className="slush-pill px-4 py-2 bg-black text-white hover:bg-neutral-800 text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all">
+                <span>View Full Leaderboard</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
+              </button>
+            </Link>
+          </div>
         </motion.div>
       </div>
     </section>

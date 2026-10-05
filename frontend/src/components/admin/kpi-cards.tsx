@@ -1,5 +1,4 @@
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Users, Target, Share2, Building2 } from 'lucide-react';
 
 export interface KPICardsProps {
@@ -25,28 +24,28 @@ export const KPICards: React.FC<KPICardsProps> = ({
       value: registrations.toLocaleString(),
       subtext: `Goal: ${target} students`,
       icon: Users,
-      color: 'text-primary bg-primary/10 border-primary/20',
+      badgeColor: 'bg-slush-sky text-black',
     },
     {
       title: 'Goal Progress',
       value: `${goalProgress}%`,
       subtext: `${Math.max(target - registrations, 0)} spots remaining`,
       icon: Target,
-      color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20',
+      badgeColor: 'bg-slush-mint text-black',
     },
     {
       title: 'Referral Rate',
       value: `${referralRate}%`,
-      subtext: `${referralRegistrations} through referrals`,
+      subtext: `${referralRegistrations} via referral link`,
       icon: Share2,
-      color: 'text-amber-500 bg-amber-500/10 border-amber-500/20',
+      badgeColor: 'bg-slush-sunburst text-black',
     },
     {
       title: 'Active Campuses',
       value: activeCampuses.toString(),
       subtext: 'Engineering institutions represented',
       icon: Building2,
-      color: 'text-indigo-500 bg-indigo-500/10 border-indigo-500/20',
+      badgeColor: 'bg-slush-lavender text-black',
     },
   ];
 
@@ -55,24 +54,24 @@ export const KPICards: React.FC<KPICardsProps> = ({
       {cards.map((c, i) => {
         const Icon = c.icon;
         return (
-          <Card key={i} className="border-border/80 bg-card shadow-xs">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-xs uppercase font-bold tracking-wider text-muted-foreground">
+          <div key={i} className="slush-card p-6 bg-white border border-black flex flex-col justify-between shadow-none">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-xs uppercase font-bold tracking-wider text-neutral-600">
                 {c.title}
-              </CardTitle>
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center border ${c.color}`}>
+              </span>
+              <div className={`w-9 h-9 rounded-[14px] border border-black ${c.badgeColor} flex items-center justify-center font-bold`}>
                 <Icon className="w-4 h-4" />
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-extrabold text-foreground tracking-tight">
+            </div>
+            <div>
+              <div className="font-display font-extrabold text-4xl text-black tracking-tight leading-none">
                 {c.value}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-neutral-600 font-medium mt-1.5">
                 {c.subtext}
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         );
       })}
     </div>
