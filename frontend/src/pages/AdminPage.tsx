@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
+import { api } from '@/lib/api';
 import SiteHeader from '@/components/layout/site-header';
 import SiteFooter from '@/components/layout/site-footer';
 import KPICards from '@/components/admin/kpi-cards';
@@ -43,7 +43,7 @@ export const AdminPage: React.FC = () => {
   const { data: campaignData } = useQuery({
     queryKey: ['admin', 'activeCampaign'],
     queryFn: async () => {
-      const res = await axios.get('/api/v1/campaigns/active');
+      const res = await api.get('/campaigns/active');
       return res.data.campaign;
     },
   });
@@ -82,7 +82,7 @@ export const AdminPage: React.FC = () => {
   const { data: ambassadorsData } = useQuery({
     queryKey: ['admin', 'ambassadors', campaignId],
     queryFn: async () => {
-      const res = await axios.get('/api/v1/leaderboard/referrers?limit=20');
+      const res = await api.get('/leaderboard/referrers?limit=20');
       return res.data;
     },
     enabled: !!admin && !statsError,
