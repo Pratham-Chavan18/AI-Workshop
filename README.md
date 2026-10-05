@@ -77,6 +77,19 @@ Secondary KPIs:
 
 ## Definition of Done for MVP
 
-A student can land on the site, understand the workshop in under 10 seconds, register successfully, receive a referral link, share it through WhatsApp, and have a friend’s valid registration automatically credited to the correct referrer and campus.
+## Testing
 
-# AI-Workshop
+Automated testing is configured using Vitest and Supertest in `backend`:
+
+- **Environment Setup**: Tests run against a dedicated local configuration loaded via `backend/.env.test`.
+  - In `vitest.config.ts`, `setupFiles: ['./src/tests/setup.ts']` ensures `.env.test` is initialized prior to application module evaluation.
+  - `DATABASE_URL` is required and validated by Zod in all environments, preventing accidental fallback writes to shared or production databases.
+- **Running Tests**:
+  ```bash
+  # Run all backend tests
+  cd backend && npm run test
+
+  # Run tests in watch mode
+  cd backend && npx vitest
+  ```
+
