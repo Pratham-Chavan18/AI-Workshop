@@ -50,6 +50,7 @@ export const RegistrationForm: React.FC = () => {
   const [collegeSearchText, setCollegeSearchText] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const { colleges, isLoading: isSearchingColleges } = useColleges(collegeSearchText);
@@ -100,6 +101,7 @@ export const RegistrationForm: React.FC = () => {
 
   const onSubmit = async (values: FormValues) => {
     setServerError(null);
+    setSubmitting(true);
     try {
       const payload = {
         fullName: values.fullName.trim(),
@@ -118,6 +120,8 @@ export const RegistrationForm: React.FC = () => {
     } catch (err: any) {
       const msg = err.message || 'Registration failed. Please check your information and try again.';
       setServerError(msg);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -286,10 +290,10 @@ export const RegistrationForm: React.FC = () => {
       <Button
         type="submit"
         size="lg"
-        disabled={isSubmitting}
+        disabled={submitting || isSubmitting}
         className="w-full mt-4 h-12 text-sm sm:text-base font-semibold"
       >
-        {isSubmitting ? (
+        {submitting || isSubmitting ? (
           <span className="flex items-center gap-2">
             <Loader2 className="w-4 h-4 animate-spin" />
             <span>Securing Your Free Seat...</span>
