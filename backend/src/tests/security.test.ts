@@ -5,6 +5,7 @@ import { app } from '../app';
 import { mockPrisma, mockDb, resetMockDb } from './helpers/mockPrisma';
 import { attributeReferral } from '../services/referral.service';
 import { registerStudent } from '../services/registration.service';
+import { createStudentSessionToken, STUDENT_COOKIE_NAME } from '../utils/session';
 
 const TEST_ADMIN_KEY = 'nxtwave-super-secret-admin-key-2026';
 
@@ -205,7 +206,6 @@ describe('Security Hardening & Negative Authorization Tests', () => {
     });
 
     it('Negative: Authenticated request with invalid UUID in /users/:userId/referrals is rejected with HTTP 400', async () => {
-      const { createStudentSessionToken, STUDENT_COOKIE_NAME } = await import('../utils/session');
       const token = createStudentSessionToken('user-1', 'camp-1');
       const res = await request(app)
         .get('/api/v1/users/not-a-valid-uuid/referrals')
