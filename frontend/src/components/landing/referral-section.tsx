@@ -85,11 +85,12 @@ export const ReferralSection: React.FC = () => {
         </div>
 
         <div className="mt-12 text-center">
-          <Link to="/register">
-            <button className="slush-pill px-8 py-3.5 bg-black text-white hover:bg-neutral-800 text-sm sm:text-base font-bold tracking-[0.032em] inline-flex items-center gap-2 shadow-none transition-transform hover:-translate-y-0.5">
-              <span>Join Challenge & Get Your Link</span>
-              <ArrowUpRight className="w-5 h-5" />
-            </button>
+          <Link
+            to="/register"
+            className="slush-pill px-8 py-3.5 bg-black text-white hover:bg-neutral-800 text-sm sm:text-base font-bold tracking-[0.032em] inline-flex items-center gap-2 shadow-none transition-transform hover:-translate-y-0.5"
+          >
+            <span>Join Challenge & Get Your Link</span>
+            <ArrowUpRight className="w-5 h-5" />
           </Link>
         </div>
       </div>

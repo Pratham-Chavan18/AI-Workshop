@@ -141,11 +141,12 @@ export const CampusLeaderboardPreview: React.FC = () => {
             <span className="text-xs font-semibold text-neutral-700">
               Represent your campus in the AI Workshop challenge
             </span>
-            <Link to="/leaderboard">
-              <button className="slush-pill px-4 py-2 bg-black text-white hover:bg-neutral-800 text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all">
-                <span>View Full Leaderboard</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
-              </button>
+            <Link
+              to="/leaderboard"
+              className="slush-pill px-4 py-2 bg-black text-white hover:bg-neutral-800 text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all"
+            >
+              <span>View Full Leaderboard</span>
+              <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </motion.div>

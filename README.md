@@ -51,45 +51,45 @@ ai-workshop/
 
 ## Documentation
 
-- `docs/01-product-requirements.md` — product requirements and scope
-- `docs/02-campaign-strategy.md` — campaign and acquisition model
-- `docs/03-system-architecture.md` — architecture and data flow
-- `docs/04-database-design.md` — database schema and relationships
-- `docs/05-api-specification.md` — backend API contract
-- `docs/06-ui-ux-requirements.md` — screens and UX requirements
-- `docs/07-implementation-plan.md` — development phases and tasks
-- `docs/08-qa-test-plan.md` — testing checklist
+- `docs/production-readiness.md` — Complete production readiness, security architecture, and launch verification
+- `docs/security.md` — Security architecture, RLS policy audit, and threat mitigations
+- `docs/05-api-specification.md` — Backend API contract and auth mechanisms
+- `docs/01-product-requirements.md` — Product requirements and scope
+- `docs/02-campaign-strategy.md` — Campaign and acquisition model
+- `docs/03-system-architecture.md` — Architecture and data flow
+- `docs/04-database-design.md` — Database schema and relationships
+- `docs/06-ui-ux-requirements.md` — Screens and UX requirements
+- `docs/07-implementation-plan.md` — Development phases and tasks
+- `docs/08-qa-test-plan.md` — Testing checklist
 
-## Success Metrics
+## Production Hardening Highlights
 
-Primary KPI:
+- **Zero-IDOR Student Auth**: Student dashboard uses signed HttpOnly cookies (`aiw_student_session`), eliminating URL/query `:userId` tampering.
+- **Argon2id Admin RBAC**: Role-based access control (`admin`, `operator`, `viewer`) replaces static `X-Admin-Key` with secure sessions.
+- **Referral Campaign Isolation**: Composite foreign keys and unique constraints enforce `referrer campaign == referral campaign == referred user campaign` at the database engine level.
+- **Safe Export & Formula Injection Defense**: Chunked streaming CSV export sanitizes potential formula injection characters (`=`, `+`, `-`, `@`).
+- **Observability**: Process liveness (`/health/live`) and database readiness (`/health/ready`) probes with bounded timeouts.
+- **WAI-ARIA Accessibility**: Accessible combobox, tab panels, progress bars, and properly styled interactive links.
 
-- 500 valid workshop registrations within 7 days
+## Development & Verification Commands
 
-Secondary KPIs:
+```bash
+# Root commands across workspaces
+npm run build      # Builds both backend and frontend for production
+npm run lint       # Typechecks backend and frontend (tsc --noEmit)
+npm run test       # Runs backend automated test suite
 
-- Referral registration rate
-- Average referrals per registrant
-- Number of active campuses
-- Registration conversion rate
-- WhatsApp share rate
-- Top-performing campus ambassadors
+# Backend specific
+cd backend
+npm run dev        # Run backend server in watch mode
+npx prisma validate
+npx prisma migrate deploy
+npm run test       # Run 85 unit and integration tests
 
-## Definition of Done for MVP
+# Frontend specific
+cd frontend
+npm run dev        # Run Vite development server
+npm run build      # Build frontend production bundle (frontend/dist)
+```
 
-## Testing
-
-Automated testing is configured using Vitest and Supertest in `backend`:
-
-- **Environment Setup**: Tests run against a dedicated local configuration loaded via `backend/.env.test`.
-  - In `vitest.config.ts`, `setupFiles: ['./src/tests/setup.ts']` ensures `.env.test` is initialized prior to application module evaluation.
-  - `DATABASE_URL` is required and validated by Zod in all environments, preventing accidental fallback writes to shared or production databases.
-- **Running Tests**:
-  ```bash
-  # Run all backend tests
-  cd backend && npm run test
-
-  # Run tests in watch mode
-  cd backend && npx vitest
-  ```
 

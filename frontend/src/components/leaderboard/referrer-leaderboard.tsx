@@ -5,8 +5,7 @@ import { Award } from 'lucide-react';
 
 interface ReferrerItem {
   rank: number;
-  userId: string;
-  fullName: string;
+  displayName: string;
   collegeName: string;
   referralCount: number;
 }
@@ -81,7 +80,7 @@ export const ReferrerLeaderboard: React.FC = () => {
             ) : items.length > 0 ? (
               items.map((ref) => (
                 <tr
-                  key={ref.userId}
+                  key={`${ref.rank}-${ref.displayName}`}
                   className={`border-b border-black/10 hover:bg-slush-mist/50 transition-colors ${
                     ref.rank <= 3 ? 'bg-slush-sunburst/15' : ''
                   }`}
@@ -93,7 +92,7 @@ export const ReferrerLeaderboard: React.FC = () => {
                   </td>
                   <td className="py-4 px-4 sm:px-6">
                     <div className="font-bold text-sm sm:text-base text-black">
-                      {ref.fullName}
+                      {ref.displayName}
                     </div>
                   </td>
                   <td className="py-4 px-4 sm:px-6 text-xs sm:text-sm text-neutral-600 hidden sm:table-cell font-medium">

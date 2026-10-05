@@ -1,6 +1,7 @@
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import { httpLogger, logger } from './middleware/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { env } from './config/env';
@@ -16,7 +17,12 @@ export const createApp = (): Application => {
   const app = express();
 
   // Security middleware
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: env.NODE_ENV === 'production',
+      hsts: env.NODE_ENV === 'production',
+    })
+  );
 
   // CORS configuration
   if (env.NODE_ENV === 'development' && env.CORS_ORIGIN.length === 0) {
@@ -24,11 +30,9 @@ export const createApp = (): Application => {
   }
 
   const allowedOrigins =
-    env.NODE_ENV === 'development'
+    env.NODE_ENV === 'development' || env.NODE_ENV === 'test'
       ? Array.from(new Set([...env.CORS_ORIGIN, 'http://localhost:5173']))
-      : env.CORS_ORIGIN.length > 0
-        ? env.CORS_ORIGIN
-        : ['http://localhost:5173'];
+      : env.CORS_ORIGIN;
 
   app.use(
     cors({
@@ -44,17 +48,15 @@ export const createApp = (): Application => {
     })
   );
 
-  // Body parsing
+  // Body and Cookie parsing
+  app.use(cookieParser());
   app.use(express.json({ limit: '10kb' }));
   app.use(express.urlencoded({ extended: true }));
 
   // Logging
   app.use(httpLogger);
 
-  // Health endpoint
-  app.get('/health', (_req: Request, res: Response) => {
-    res.json({ status: 'ok', uptime: process.uptime() });
-  });
+  // Health and Observability endpoints (mounted without auth)
   app.use('/health', healthRouter);
   app.get('/api/v1/health', (_req: Request, res: Response) => {
     res.status(200).json({ status: 'ok', uptime: process.uptime(), timestamp: new Date().toISOString() });

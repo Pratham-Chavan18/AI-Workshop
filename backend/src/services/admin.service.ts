@@ -1,5 +1,5 @@
 import { prisma } from '../lib/prisma';
-import { notFound } from '../utils/errors';
+import { notFound, validationError } from '../utils/errors';
 
 export interface CampaignStatsResult {
   target: number;
@@ -74,10 +74,15 @@ export async function getCampaignStats(campaignId: string): Promise<CampaignStat
   };
 }
 
+/**
+ * Retrieves daily registration trend parameterized by the requested number of days (1-90).
+ */
 export async function getDailyRegistrationTrend(
   campaignId: string,
   days = 7
 ): Promise<DailyTrendItem[]> {
+  const validDays = Math.max(1, Math.min(90, Math.floor(days)));
+
   try {
     const rows = await prisma.$queryRaw<Array<{ date: string; count: bigint | number }>>`
       SELECT
@@ -85,7 +90,7 @@ export async function getDailyRegistrationTrend(
         COUNT(*)::int as count
       FROM "User"
       WHERE "campaignId" = ${campaignId}
-        AND "createdAt" >= NOW() - INTERVAL '7 days'
+        AND "createdAt" >= NOW() - (${validDays} * INTERVAL '1 day')
       GROUP BY TO_CHAR("createdAt" AT TIME ZONE 'Asia/Kolkata', 'YYYY-MM-DD')
       ORDER BY date ASC
     `;
@@ -112,9 +117,20 @@ export async function getSourceBreakdown(campaignId: string): Promise<SourceBrea
   }));
 }
 
-export async function getExportData(campaignId: string): Promise<RegistrationExportItem[]> {
+/**
+ * Retrieves a bounded batch of registration export items to prevent unbounded memory consumption.
+ */
+export async function getExportDataChunk(
+  campaignId: string,
+  skip = 0,
+  take = 500
+): Promise<RegistrationExportItem[]> {
+  const boundedTake = Math.min(1000, Math.max(1, take));
+
   const users = await prisma.user.findMany({
     where: { campaignId },
+    skip,
+    take: boundedTake,
     include: {
       college: {
         select: {
@@ -142,8 +158,16 @@ export async function getExportData(campaignId: string): Promise<RegistrationExp
     graduationYear: u.graduationYear,
     referralCode: u.referralCode,
     referredByUserId: u.referredByUserId || '',
-    referralsMadeCount: u.referralsMade.length,
+    referralsMadeCount: u.referralsMade?.length ?? 0,
     source: u.source,
     registeredAt: u.createdAt.toISOString(),
   }));
+}
+
+export async function getTotalExportCount(campaignId: string): Promise<number> {
+  return prisma.user.count({ where: { campaignId } });
+}
+
+export async function getExportData(campaignId: string): Promise<RegistrationExportItem[]> {
+  return getExportDataChunk(campaignId, 0, 1000);
 }

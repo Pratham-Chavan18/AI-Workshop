@@ -288,8 +288,8 @@ describe('Registration Integration Tests (Phone Normalization & Campaign Scoping
       name: 'Workshop Batch B',
       slug: 'batch-b',
       targetRegistrations: 500,
-      startsAt: new Date('2026-11-05'),
-      endsAt: new Date('2026-12-05'),
+      startsAt: new Date('2026-10-01'),
+      endsAt: new Date('2026-11-01'),
       status: 'active',
     });
 

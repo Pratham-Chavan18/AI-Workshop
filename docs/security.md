@@ -145,9 +145,14 @@ The public leaderboard endpoints (`/api/v1/leaderboard/campuses` and `/api/v1/le
 
 ## 8. Admin Authentication & Protection
 
-- **Timing-Safe Key Verification**: Admin routes are protected by `requireAdminKey` middleware which performs constant-time buffer comparison (`crypto.timingSafeEqual`) against `ADMIN_API_KEY`.
-- **No Client-Side Roles**: The server never trusts client-supplied headers or body fields claiming `role: "admin"` or `isAdmin: true`.
-- **Rate Limiting**: Admin endpoints are strictly rate limited to 30 requests per minute to prevent brute-force attacks.
+- **Argon2id Password Storage**: Admin credentials are authenticated via `POST /api/v1/admin/auth/login` and hashed with Argon2id (`memoryCost: 65536`, `timeCost: 3`, `parallelism: 4`).
+- **Role-Based Access Control (RBAC)**: Supports `admin`, `operator`, and `viewer` roles. All routes enforce `requireAdminSession` and role-specific permissions via `requireAdminRole`.
+- **HttpOnly Session Cookies**: Authenticated sessions use signed HMAC-SHA256 HttpOnly cookies (`aiw_admin_session`) with short 8-hour lifecycles. Shared static API keys (`X-Admin-Key`) have been decommissioned.
+- **Role Permissions**:
+  - `viewer`: Read-only access to analytics dashboards and trend charts.
+  - `operator`: Analytics + bounded, sanitized CSV export.
+  - `admin`: Full administrative access.
+- **Rate Limiting**: Admin endpoints are strictly rate limited to prevent brute-force attacks.
 
 ---
 
@@ -156,7 +161,8 @@ The public leaderboard endpoints (`/api/v1/leaderboard/campuses` and `/api/v1/le
 ### Server Secrets (`backend/.env`)
 These variables must **NEVER** be committed to version control or included in frontend client bundles:
 - `DATABASE_URL`: Full PostgreSQL connection string with password.
-- `ADMIN_API_KEY`: Secret token for administrative operations.
+- `SESSION_SECRET`: Cryptographically secure HMAC-SHA256 signing secret (minimum 32 characters).
+- `ADMIN_BOOTSTRAP_EMAIL` / `ADMIN_BOOTSTRAP_PASSWORD`: Initial bootstrap admin credentials for seeding.
 - `SUPABASE_SERVICE_ROLE_KEY`: Service-role key for backend automation.
 
 ### Frontend Variables (`frontend/.env`)
@@ -195,5 +201,5 @@ npm test
 - [x] Public leaderboard queries redact all student contact info and PII.
 - [x] Strict CORS origin validation implemented.
 - [x] Rate limiters protect registration, leaderboard, admin, and user endpoints.
-- [x] All 28 automated tests (including 14 security and negative authorization tests) pass with 0 failures.
+- [x] All 85 automated tests (including 14 security, student IDOR, campaign isolation, and concurrency integration tests) pass with 0 failures.
 - [x] Frontend and backend production builds compile with zero errors.

@@ -1,15 +1,11 @@
 import { PrismaClient } from '@prisma/client';
-import crypto from 'crypto';
 import { COLLEGES } from './colleges-data';
+import { hashPassword } from '../src/utils/password';
 
 const prisma = new PrismaClient();
 
 export function normalizeName(name: string): string {
   return name.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
-}
-
-export function hashPassword(password: string): string {
-  return crypto.createHash('sha256').update(password).digest('hex');
 }
 
 async function main() {
@@ -54,26 +50,45 @@ async function main() {
   }
   console.log(`✅ Upserted ${collegesCount} colleges.`);
 
-  // 3. Seed default Admin User
-  const defaultAdminPassword = process.env.ADMIN_DEFAULT_PASSWORD || 'Admin@aiworkshop!';
-  const admin = await prisma.adminUser.upsert({
-    where: { email: 'admin@aiworkshop.nxtwave.com' },
-    update: {
-      passwordHash: hashPassword(defaultAdminPassword),
-      role: 'operator',
-    },
-    create: {
-      email: 'admin@aiworkshop.nxtwave.com',
-      passwordHash: hashPassword(defaultAdminPassword),
-      role: 'operator',
-    },
-  });
-  console.log(`✅ Admin user seeded: ${admin.email} (${admin.role})`);
+  // 3. Bootstrap initial Admin User if environment variables are provided
+  // Production rules:
+  // - Never overwrite existing admin credentials
+  // - Never seed a default/hardcoded password
+  // - Require explicit ADMIN_BOOTSTRAP_EMAIL & ADMIN_BOOTSTRAP_PASSWORD
+  const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL;
+  const bootstrapPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD;
+  const bootstrapRole = (process.env.ADMIN_BOOTSTRAP_ROLE as 'admin' | 'operator' | 'viewer') || 'admin';
+
+  const existingAdminCount = await prisma.adminUser.count();
+
+  if (existingAdminCount === 0) {
+    if (!bootstrapEmail || !bootstrapPassword) {
+      console.warn('⚠️ No AdminUser exists and ADMIN_BOOTSTRAP_EMAIL / ADMIN_BOOTSTRAP_PASSWORD are not set. Skipping admin creation.');
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('Bootstrap admin credentials required when no admin exists in production.');
+      }
+    } else {
+      if (bootstrapPassword.length < 12) {
+        throw new Error('ADMIN_BOOTSTRAP_PASSWORD must be at least 12 characters.');
+      }
+      const hashedPassword = await hashPassword(bootstrapPassword);
+      const createdAdmin = await prisma.adminUser.create({
+        data: {
+          email: bootstrapEmail.toLowerCase().trim(),
+          passwordHash: hashedPassword,
+          role: bootstrapRole,
+        },
+      });
+      console.log(`✅ Bootstrapped initial admin user: ${createdAdmin.email} with role: ${createdAdmin.role}`);
+    }
+  } else {
+    console.log(`ℹ️ Existing admin accounts detected (${existingAdminCount}). Preserving existing admin credentials without overwriting.`);
+  }
 
   console.log('Seed complete', {
     campaign: campaign.slug,
     colleges: collegesCount,
-    adminEmail: admin.email,
+    adminAccounts: existingAdminCount > 0 ? existingAdminCount : (bootstrapEmail ? 1 : 0),
   });
 }
 
@@ -85,3 +100,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+

@@ -1,15 +1,14 @@
 import React, { useEffect } from 'react';
-import { useParams, useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import SiteHeader from '@/components/layout/site-header';
 import SiteFooter from '@/components/layout/site-footer';
 import ReferralProgressCard from '@/components/student/referral-progress-card';
 import ReferralShareCard from '@/components/student/referral-share-card';
-import { getReferralStats } from '@/services/dashboard.service';
+import { getMyDashboardStats } from '@/services/dashboard.service';
 import { CheckCircle2, Trophy, ArrowUpRight, RefreshCw, AlertCircle } from 'lucide-react';
 
 export const DashboardPage: React.FC = () => {
-  const { userId } = useParams<{ userId: string }>();
   const [searchParams] = useSearchParams();
   const initialCode = searchParams.get('code') || '';
 
@@ -18,15 +17,15 @@ export const DashboardPage: React.FC = () => {
   }, []);
 
   const { data: stats, isLoading, error, refetch } = useQuery({
-    queryKey: ['dashboard', userId],
-    queryFn: () => getReferralStats(userId!),
-    enabled: !!userId,
+    queryKey: ['student-dashboard-me'],
+    queryFn: () => getMyDashboardStats(),
     refetchInterval: 30_000,
+    retry: 1,
   });
 
-  const referralCode = stats?.referralCode || initialCode || 'AIWCODE';
+  const referralCode = stats?.referralCode || initialCode;
   const referralUrl =
-    stats?.referralUrl || `${window.location.origin}/register?ref=${referralCode}`;
+    stats?.referralUrl || (referralCode ? `${window.location.origin}/register?ref=${referralCode}` : '');
   const referralCount = stats?.referralCount ?? 0;
   const goal = stats?.goal ?? 3;
   const campusRank = stats?.campusRank ?? null;
@@ -52,11 +51,12 @@ export const DashboardPage: React.FC = () => {
             </div>
           </div>
 
-          <Link to="/leaderboard" className="shrink-0">
-            <button className="slush-pill px-5 py-2.5 bg-white text-black hover:bg-slush-mist text-xs sm:text-sm font-bold flex items-center gap-1.5 transition-all">
-              <Trophy className="w-4 h-4 text-black" />
-              <span>Campus Standings</span>
-            </button>
+          <Link
+            to="/leaderboard"
+            className="slush-pill px-5 py-2.5 bg-white text-black hover:bg-slush-mist text-xs sm:text-sm font-bold inline-flex items-center gap-1.5 transition-all shrink-0"
+          >
+            <Trophy className="w-4 h-4 text-black" />
+            <span>Campus Standings</span>
           </Link>
         </div>
 
@@ -70,18 +70,26 @@ export const DashboardPage: React.FC = () => {
           <div className="p-8 bg-white border border-black rounded-[28px] text-center max-w-md mx-auto space-y-4">
             <AlertCircle className="w-10 h-10 text-slush-ember mx-auto" />
             <h3 className="font-display font-extrabold text-2xl text-black uppercase">
-              Could not load live dashboard
+              Dashboard Session Expired
             </h3>
             <p className="text-xs text-neutral-600 font-medium">
-              We couldn't connect to fetch your referral stats right now. Please try again.
+              Please register or refresh your session to view your live referral dashboard.
             </p>
-            <button
-              onClick={() => refetch()}
-              className="slush-pill px-6 py-2.5 bg-black text-white hover:bg-neutral-800 text-xs font-bold inline-flex items-center gap-2"
-            >
-              <RefreshCw className="w-4 h-4" />
-              <span>Try Again</span>
-            </button>
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={() => refetch()}
+                className="slush-pill px-5 py-2.5 bg-black text-white hover:bg-neutral-800 text-xs font-bold inline-flex items-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span>Retry</span>
+              </button>
+              <Link
+                to="/register"
+                className="slush-pill px-5 py-2.5 bg-white text-black hover:bg-slush-mist text-xs font-bold inline-flex items-center border border-black"
+              >
+                <span>Register</span>
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
@@ -104,11 +112,12 @@ export const DashboardPage: React.FC = () => {
 
         {/* Bottom CTA to Leaderboard */}
         <div className="mt-12 text-center">
-          <Link to="/leaderboard">
-            <button className="slush-pill px-8 py-3.5 bg-white text-black hover:bg-slush-mist text-sm font-bold inline-flex items-center gap-2 transition-transform hover:-translate-y-0.5">
-              <span>View Full Campus Leaderboard & Top Referrers</span>
-              <ArrowUpRight className="w-4 h-4" />
-            </button>
+          <Link
+            to="/leaderboard"
+            className="slush-pill px-8 py-3.5 bg-white text-black hover:bg-slush-mist text-sm font-bold inline-flex items-center gap-2 transition-transform hover:-translate-y-0.5"
+          >
+            <span>View Full Campus Leaderboard & Top Referrers</span>
+            <ArrowUpRight className="w-4 h-4" />
           </Link>
         </div>
       </main>

@@ -59,8 +59,7 @@ model User {
   referralsMade    Referral[] @relation("ReferrerReferrals")
   referralReceived Referral?  @relation("ReferredReferrals")
 
-  // TODO: Consider global user identity — currently User is scoped per campaign (@@unique([campaignId, emailNormalized])).
-  // A future "Person" or "StudentProfile" model could maintain global identity across multiple campaigns.
+  @@unique([id, campaignId])
   @@unique([campaignId, emailNormalized])
   @@unique([campaignId, phoneNormalized])
   @@index([campaignId])
@@ -74,15 +73,16 @@ model Referral {
   id             String   @id @default(uuid())
   campaignId     String
   referrerUserId String
-  referredUserId String   @unique // guarantees exactly one referral record per referred user
+  referredUserId String
   referralCode   String
   status         String   @default("valid") // valid, invalid, self_referral
   createdAt      DateTime @default(now())
 
   campaign       Campaign @relation(fields: [campaignId], references: [id])
-  referrer       User     @relation("ReferrerReferrals", fields: [referrerUserId], references: [id])
-  referred       User     @relation("ReferredReferrals", fields: [referredUserId], references: [id])
+  referrer       User     @relation("ReferrerReferrals", fields: [referrerUserId, campaignId], references: [id, campaignId])
+  referred       User     @relation("ReferredReferrals", fields: [referredUserId, campaignId], references: [id, campaignId])
 
+  @@unique([referredUserId, campaignId])
   @@index([campaignId])
   @@index([referrerUserId])
   @@index([referralCode])

@@ -12,10 +12,18 @@ export interface CampusLeaderboardItem {
 
 export interface ReferrerLeaderboardItem {
   rank: number;
-  userId: string;
-  fullName: string;
+  displayName: string;
   collegeName: string;
   referralCount: number;
+}
+
+export function formatDisplayName(fullName: string): string {
+  const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 0 || !parts[0]) return 'Anonymous';
+  if (parts.length === 1) return parts[0];
+  const firstName = parts[0];
+  const lastInitial = parts[parts.length - 1].charAt(0).toUpperCase();
+  return `${firstName} ${lastInitial}.`;
 }
 
 export async function getCampusLeaderboard(
@@ -70,7 +78,6 @@ export async function getReferrerLeaderboard(
   const rows = await prisma.$queryRaw<
     Array<{
       rank: bigint | number;
-      userId: string;
       fullName: string;
       collegeName: string;
       referralCount: bigint | number;
@@ -78,13 +85,12 @@ export async function getReferrerLeaderboard(
   >`
     SELECT
       ROW_NUMBER() OVER (ORDER BY COUNT(r.id) DESC, u."createdAt" ASC)::int as rank,
-      u.id as "userId",
       u."fullName",
       c.name as "collegeName",
       COUNT(r.id)::int as "referralCount"
     FROM "User" u
     INNER JOIN "College" c ON c.id = u."collegeId"
-    LEFT JOIN "Referral" r ON r."referrerUserId" = u.id AND r.status = 'valid'
+    LEFT JOIN "Referral" r ON r."referrerUserId" = u.id AND r.status = 'valid' AND r."campaignId" = ${campaignId}
     WHERE u."campaignId" = ${campaignId}
     GROUP BY u.id, u."fullName", c.name, u."createdAt"
     HAVING COUNT(r.id) > 0
@@ -94,9 +100,9 @@ export async function getReferrerLeaderboard(
 
   return rows.map((r) => ({
     rank: Number(r.rank),
-    userId: r.userId,
-    fullName: r.fullName,
+    displayName: formatDisplayName(r.fullName),
     collegeName: r.collegeName,
     referralCount: Number(r.referralCount),
   }));
 }
+

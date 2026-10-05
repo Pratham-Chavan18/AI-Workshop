@@ -4,8 +4,8 @@ import { Award, Users } from 'lucide-react';
 
 export interface AmbassadorItem {
   rank: number;
-  userId: string;
-  fullName: string;
+  displayName?: string;
+  fullName?: string;
   collegeName: string;
   referralCount: number;
 }
@@ -39,12 +39,12 @@ export const AmbassadorTable: React.FC<AmbassadorTableProps> = ({ ambassadors })
           <tbody>
             {ambassadors.length > 0 ? (
               ambassadors.slice(0, 10).map((a) => (
-                <tr key={a.userId} className="border-b border-border/40 hover:bg-muted/30">
+                <tr key={`${a.rank}-${a.displayName || a.fullName}`} className="border-b border-border/40 hover:bg-muted/30">
                   <td className="py-3 px-4 text-center font-bold text-muted-foreground">
                     #{a.rank}
                   </td>
                   <td className="py-3 px-4 font-semibold text-foreground">
-                    {a.fullName}
+                    {a.displayName || a.fullName}
                   </td>
                   <td className="py-3 px-4 text-muted-foreground truncate max-w-[150px]">
                     {a.collegeName}

@@ -32,6 +32,14 @@ export const router = createBrowserRouter([
     ),
   },
   {
+    path: '/dashboard',
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <DashboardPage />
+      </Suspense>
+    ),
+  },
+  {
     path: '/dashboard/:userId',
     element: (
       <Suspense fallback={<PageLoader />}>

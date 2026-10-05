@@ -64,7 +64,14 @@ export const LeaderboardPage: React.FC = () => {
             </div>
 
             {/* Custom Slush Progress Bar */}
-            <div className="w-full h-4 bg-slush-mist border border-black rounded-full overflow-hidden p-0.5">
+            <div
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={progressPercent}
+              aria-label="National seats filled progress"
+              className="w-full h-4 bg-slush-mist border border-black rounded-full overflow-hidden p-0.5"
+            >
               <div
                 style={{ width: `${progressPercent}%` }}
                 className="h-full bg-slush-mint rounded-full border-r border-black transition-all duration-500"
@@ -78,9 +85,17 @@ export const LeaderboardPage: React.FC = () => {
           </div>
 
           {/* Segmented Pill Tab Switcher */}
-          <div className="mt-8 inline-flex p-1 bg-white rounded-pill border border-black gap-1">
+          <div
+            role="tablist"
+            aria-label="Leaderboard views"
+            className="mt-8 inline-flex p-1 bg-white rounded-pill border border-black gap-1"
+          >
             <button
               type="button"
+              role="tab"
+              id="tab-campuses"
+              aria-selected={activeTab === 'campuses'}
+              aria-controls="panel-campuses"
               onClick={() => setActiveTab('campuses')}
               className={`flex items-center gap-2 px-6 py-2.5 rounded-pill text-xs sm:text-sm font-bold tracking-[0.03em] transition-all cursor-pointer ${
                 activeTab === 'campuses'
@@ -94,6 +109,10 @@ export const LeaderboardPage: React.FC = () => {
 
             <button
               type="button"
+              role="tab"
+              id="tab-referrers"
+              aria-selected={activeTab === 'referrers'}
+              aria-controls="panel-referrers"
               onClick={() => setActiveTab('referrers')}
               className={`flex items-center gap-2 px-6 py-2.5 rounded-pill text-xs sm:text-sm font-bold tracking-[0.03em] transition-all cursor-pointer ${
                 activeTab === 'referrers'
@@ -110,9 +129,13 @@ export const LeaderboardPage: React.FC = () => {
         {/* Tab Panels */}
         <div className="max-w-4xl mx-auto">
           {activeTab === 'campuses' ? (
-            <CampusLeaderboard />
+            <div role="tabpanel" id="panel-campuses" aria-labelledby="tab-campuses">
+              <CampusLeaderboard />
+            </div>
           ) : (
-            <ReferrerLeaderboard />
+            <div role="tabpanel" id="panel-referrers" aria-labelledby="tab-referrers">
+              <ReferrerLeaderboard />
+            </div>
           )}
 
           {/* Bottom CTA to Register */}
@@ -125,11 +148,12 @@ export const LeaderboardPage: React.FC = () => {
                 Register now, grab your referral link, and rally your classmates to claim the #1 spot.
               </p>
             </div>
-            <Link to="/register" className="shrink-0 w-full sm:w-auto">
-              <button className="slush-pill px-8 py-3.5 bg-black text-white hover:bg-neutral-800 text-sm font-bold flex items-center justify-center gap-2 w-full sm:w-auto">
-                <span>Represent My College</span>
-                <ArrowUpRight className="w-4 h-4" />
-              </button>
+            <Link
+              to="/register"
+              className="slush-pill px-8 py-3.5 bg-black text-white hover:bg-neutral-800 text-sm font-bold flex items-center justify-center gap-2 w-full sm:w-auto shrink-0"
+            >
+              <span>Represent My College</span>
+              <ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>
         </div>

@@ -81,7 +81,14 @@ export const ReferralProgressCard: React.FC<ReferralProgressCardProps> = ({
             <span className="font-display font-extrabold text-2xl text-black">{percentage}%</span>
           </div>
 
-          <div className="w-full h-4 bg-slush-mist border border-black rounded-full overflow-hidden p-0.5">
+          <div
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={percentage}
+            aria-label="Referral milestone completion progress"
+            className="w-full h-4 bg-slush-mist border border-black rounded-full overflow-hidden p-0.5"
+          >
             <div
               style={{ width: `${percentage}%` }}
               className="h-full bg-slush-mint rounded-full border-r border-black transition-all duration-500"

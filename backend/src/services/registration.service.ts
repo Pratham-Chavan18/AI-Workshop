@@ -20,19 +20,26 @@ export interface PublicStudentResult {
 
 export interface RegisterResult {
   user: PublicStudentResult;
+  campaignId: string;
   isNew: boolean;
 }
 
 export async function registerStudent(input: RegistrationInput): Promise<RegisterResult> {
   const normalized = normalizeRegistration(input);
 
-  // 1. Fetch currently active campaign & verify valid campaign window
+  // 1. Fetch currently active campaign & verify valid campaign time window
   const campaign = await prisma.campaign.findFirst({
     where: { status: 'active' },
     orderBy: { startsAt: 'desc' },
   });
 
-  if (!campaign || campaign.status !== 'active' || (campaign.endsAt && new Date() > new Date(campaign.endsAt))) {
+  const now = new Date();
+  if (
+    !campaign ||
+    campaign.status !== 'active' ||
+    (campaign.startsAt && now < new Date(campaign.startsAt)) ||
+    (campaign.endsAt && now > new Date(campaign.endsAt))
+  ) {
     throw campaignClosed();
   }
 
@@ -45,17 +52,35 @@ export async function registerStudent(input: RegistrationInput): Promise<Registe
     throw validationError('Invalid college ID selected');
   }
 
-  // 3. Validate referral code if provided (normalized uppercase lookup)
-  let referrerUser: { id: string; emailNormalized: string; phoneNormalized: string | null } | null = null;
+  // 3. Validate referral code if provided (campaign-scoped lookup: campaignId + referralCode)
+  let referrerUser: {
+    id: string;
+    campaignId: string;
+    emailNormalized: string;
+    phoneNormalized: string | null;
+  } | null = null;
+
   if (normalized.referralCode) {
     const lookupCode = normalized.referralCode.trim().toUpperCase();
-    referrerUser = await prisma.user.findUnique({
-      where: { referralCode: lookupCode },
-      select: { id: true, emailNormalized: true, phoneNormalized: true },
+    referrerUser = await prisma.user.findFirst({
+      where: {
+        campaignId: campaign.id,
+        referralCode: lookupCode,
+      },
+      select: {
+        id: true,
+        campaignId: true,
+        emailNormalized: true,
+        phoneNormalized: true,
+      },
     });
 
     if (!referrerUser) {
-      throw invalidReferralCode();
+      throw invalidReferralCode('Invalid referral code or code belongs to another campaign');
+    }
+
+    if (referrerUser.campaignId !== campaign.id) {
+      throw invalidReferralCode('Referral code does not belong to the active campaign');
     }
 
     if (referrerUser.emailNormalized === normalized.emailNormalized) {
@@ -96,7 +121,7 @@ export async function registerStudent(input: RegistrationInput): Promise<Registe
           },
         });
 
-        // If referred by another student, record referral attribution
+        // If referred by another student, record referral attribution atomically
         if (referrerUser && normalized.referralCode) {
           await tx.referral.create({
             data: {
@@ -148,6 +173,7 @@ export async function registerStudent(input: RegistrationInput): Promise<Registe
       referralCode: createdUser.referralCode,
       referralUrl,
     },
+    campaignId: campaign.id,
     isNew: true,
   };
 }

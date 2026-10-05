@@ -3,11 +3,13 @@ import { vi } from 'vitest';
 export const mockDb = {
   users: [] as any[],
   referrals: [] as any[],
+  adminUsers: [] as any[],
 };
 
 export function resetMockDb() {
   mockDb.users = [];
   mockDb.referrals = [];
+  mockDb.adminUsers = [];
 }
 
 export const mockPrisma = {
@@ -50,6 +52,16 @@ export const mockPrisma = {
   },
   user: {
     findFirst: vi.fn().mockImplementation(({ where }) => {
+      if (where?.campaignId && where?.referralCode) {
+        const found = mockDb.users.find(
+          (u) => u.campaignId === where.campaignId && u.referralCode === where.referralCode
+        );
+        return Promise.resolve(found || null);
+      }
+      if (where?.referralCode) {
+        const found = mockDb.users.find((u) => u.referralCode === where.referralCode);
+        return Promise.resolve(found || null);
+      }
       if (where?.campaignId && where?.phoneNormalized) {
         const found = mockDb.users.find(
           (u) => u.campaignId === where.campaignId && u.phoneNormalized === where.phoneNormalized
@@ -77,7 +89,26 @@ export const mockPrisma = {
       }
       return Promise.resolve(null);
     }),
-    findMany: vi.fn().mockResolvedValue([]),
+    findMany: vi.fn().mockImplementation(({ where, skip, take }) => {
+      let filtered = [...mockDb.users];
+      if (where?.campaignId) {
+        filtered = filtered.filter((u) => u.campaignId === where.campaignId);
+      }
+      if (typeof skip === 'number' && typeof take === 'number') {
+        return Promise.resolve(
+          filtered.slice(skip, skip + take).map((u) => ({
+            ...u,
+            college: { name: 'IIT Bombay' },
+          }))
+        );
+      }
+      return Promise.resolve(
+        filtered.map((u) => ({
+          ...u,
+          college: { name: 'IIT Bombay' },
+        }))
+      );
+    }),
     create: vi.fn().mockImplementation(({ data }) => {
       // Check unique constraint: (campaignId, emailNormalized)
       const existingEmail = mockDb.users.find(
@@ -143,7 +174,28 @@ export const mockPrisma = {
     count: vi.fn().mockImplementation(() => Promise.resolve(mockDb.referrals.length || 5)),
   },
   adminUser: {
-    findUnique: vi.fn(),
+    findUnique: vi.fn().mockImplementation(({ where }) => {
+      if (where?.email) {
+        const found = mockDb.adminUsers.find((a) => a.email === where.email);
+        return Promise.resolve(found || null);
+      }
+      if (where?.id) {
+        const found = mockDb.adminUsers.find((a) => a.id === where.id);
+        return Promise.resolve(found || null);
+      }
+      return Promise.resolve(null);
+    }),
+    findMany: vi.fn().mockImplementation(() => Promise.resolve(mockDb.adminUsers)),
+    create: vi.fn().mockImplementation(({ data }) => {
+      const newAdmin = {
+        id: `admin-${mockDb.adminUsers.length + 1}`,
+        createdAt: new Date(),
+        ...data,
+      };
+      mockDb.adminUsers.push(newAdmin);
+      return Promise.resolve(newAdmin);
+    }),
+    count: vi.fn().mockImplementation(() => Promise.resolve(mockDb.adminUsers.length)),
     upsert: vi.fn(),
   },
   $transaction: vi.fn().mockImplementation(async (cb) => {
@@ -166,7 +218,6 @@ export const mockPrisma = {
       return Promise.resolve([
         {
           rank: 1,
-          userId: 'user-1',
           fullName: 'Rahul Sharma',
           collegeName: 'IIT Bombay',
           referralCount: 4,

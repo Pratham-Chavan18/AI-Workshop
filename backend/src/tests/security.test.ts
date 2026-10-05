@@ -103,8 +103,10 @@ describe('Security Hardening & Negative Authorization Tests', () => {
 
   describe('3. Referral Security & Fraud Prevention', () => {
     it('Negative: Student cannot refer themselves via email match', async () => {
-      mockPrisma.user.findUnique.mockResolvedValueOnce({
+      mockPrisma.user.findFirst.mockResolvedValueOnce({
         id: 'user-self',
+        campaignId: 'test-campaign-id',
+        referralCode: 'SELF01',
         emailNormalized: 'self@student.edu',
       });
 
@@ -174,12 +176,14 @@ describe('Security Hardening & Negative Authorization Tests', () => {
       expect(res.body).toHaveProperty('items');
       const item = res.body.items[0];
       if (item) {
-        expect(item).toHaveProperty('fullName');
+        expect(item).toHaveProperty('displayName');
         expect(item).toHaveProperty('collegeName');
         expect(item).toHaveProperty('referralCount');
         // Critical: contact info must NEVER be exposed
         expect(item).not.toHaveProperty('email');
         expect(item).not.toHaveProperty('phone');
+        expect(item).not.toHaveProperty('userId');
+        expect(item).not.toHaveProperty('referralCode');
       }
     });
 
@@ -193,8 +197,19 @@ describe('Security Hardening & Negative Authorization Tests', () => {
   });
 
   describe('5. Input Validation & Parameter Sanitization', () => {
-    it('Negative: Invalid UUID in /users/:userId/referrals is rejected with HTTP 400', async () => {
+    it('Negative: Unauthenticated request to /users/:userId/referrals is rejected with HTTP 401', async () => {
       const res = await request(app).get('/api/v1/users/not-a-valid-uuid/referrals');
+      expect(res.status).toBe(401);
+      expect(res.body.success).toBe(false);
+      expect(res.body.error.code).toBe('UNAUTHORIZED');
+    });
+
+    it('Negative: Authenticated request with invalid UUID in /users/:userId/referrals is rejected with HTTP 400', async () => {
+      const { createStudentSessionToken, STUDENT_COOKIE_NAME } = await import('../utils/session');
+      const token = createStudentSessionToken('user-1', 'camp-1');
+      const res = await request(app)
+        .get('/api/v1/users/not-a-valid-uuid/referrals')
+        .set('Cookie', `${STUDENT_COOKIE_NAME}=${token}`);
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
       expect(res.body.error.code).toBe('VALIDATION_ERROR');

@@ -49,6 +49,7 @@ export const RegistrationForm: React.FC = () => {
 
   const [collegeSearchText, setCollegeSearchText] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [focusedCollegeIndex, setFocusedCollegeIndex] = useState(-1);
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -97,6 +98,32 @@ export const RegistrationForm: React.FC = () => {
     setValue('collegeId', college.id, { shouldValidate: true });
     setCollegeSearchText(college.name);
     setIsDropdownOpen(false);
+    setFocusedCollegeIndex(-1);
+  };
+
+  const handleKeyDownCombobox = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!isDropdownOpen || colleges.length === 0) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        setIsDropdownOpen(true);
+      }
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setFocusedCollegeIndex((prev) => (prev + 1) % colleges.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setFocusedCollegeIndex((prev) => (prev - 1 + colleges.length) % colleges.length);
+    } else if (e.key === 'Enter') {
+      if (focusedCollegeIndex >= 0 && focusedCollegeIndex < colleges.length) {
+        e.preventDefault();
+        handleSelectCollege(colleges[focusedCollegeIndex]);
+      }
+    } else if (e.key === 'Escape') {
+      setIsDropdownOpen(false);
+      setFocusedCollegeIndex(-1);
+    }
   };
 
   const onSubmit = async (values: FormValues) => {
@@ -116,7 +143,7 @@ export const RegistrationForm: React.FC = () => {
       const result = await registerStudent(payload);
       const user = result.user;
 
-      navigate(`/dashboard/${user.id}?code=${user.referralCode}`);
+      navigate(`/dashboard?code=${user.referralCode}`);
     } catch (err: any) {
       const msg = err.message || 'Registration failed. Please check your information and try again.';
       setServerError(msg);
@@ -142,7 +169,11 @@ export const RegistrationForm: React.FC = () => {
 
       {/* Server Error Alert */}
       {serverError && (
-        <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-start gap-2.5 text-xs text-rose-600 font-medium">
+        <div
+          role="alert"
+          aria-live="polite"
+          className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-start gap-2.5 text-xs text-rose-600 font-medium"
+        >
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>{serverError}</span>
         </div>
@@ -150,43 +181,66 @@ export const RegistrationForm: React.FC = () => {
 
       {/* Full Name */}
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-foreground">
+        <label htmlFor="reg-fullname" className="text-xs font-semibold text-foreground">
           Full Name <span className="text-primary">*</span>
         </label>
-        <Input placeholder="e.g. Rahul Sharma" {...register('fullName')} />
+        <Input
+          id="reg-fullname"
+          aria-invalid={!!errors.fullName}
+          aria-describedby={errors.fullName ? 'fullname-error' : undefined}
+          placeholder="e.g. Rahul Sharma"
+          {...register('fullName')}
+        />
         {errors.fullName && (
-          <p className="text-xs text-rose-500">{errors.fullName.message}</p>
+          <p id="fullname-error" className="text-xs text-rose-500">{errors.fullName.message}</p>
         )}
       </div>
 
       {/* Email Address */}
       <div className="space-y-1">
-        <label className="text-xs font-semibold text-foreground">
+        <label htmlFor="reg-email" className="text-xs font-semibold text-foreground">
           College / Personal Email <span className="text-primary">*</span>
         </label>
-        <Input type="email" placeholder="e.g. rahul@example.com" {...register('email')} />
+        <Input
+          id="reg-email"
+          type="email"
+          aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? 'email-error' : undefined}
+          placeholder="e.g. rahul@example.com"
+          {...register('email')}
+        />
         {errors.email && (
-          <p className="text-xs text-rose-500">{errors.email.message}</p>
+          <p id="email-error" className="text-xs text-rose-500">{errors.email.message}</p>
         )}
       </div>
 
       {/* College Autocomplete */}
       <div className="space-y-1 relative" ref={dropdownRef}>
         <input type="hidden" {...register('collegeId')} />
-        <label className="text-xs font-semibold text-foreground">
+        <label htmlFor="reg-college" className="text-xs font-semibold text-foreground">
           Engineering College / University <span className="text-primary">*</span>
         </label>
         <div className="relative">
           <Input
+            id="reg-college"
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded={isDropdownOpen && collegeSearchText.trim().length >= 2}
+            aria-controls="college-listbox"
+            aria-activedescendant={focusedCollegeIndex >= 0 ? `college-option-${focusedCollegeIndex}` : undefined}
+            aria-invalid={!!errors.collegeId}
+            aria-describedby={errors.collegeId ? 'college-error' : undefined}
             value={collegeSearchText}
             onChange={(e) => {
               setCollegeSearchText(e.target.value);
               setIsDropdownOpen(true);
+              setFocusedCollegeIndex(-1);
               if (selectedCollegeId) {
                 setValue('collegeId', '', { shouldValidate: true });
               }
             }}
             onFocus={() => setIsDropdownOpen(true)}
+            onKeyDown={handleKeyDownCombobox}
             placeholder="Type your college name (e.g. IIT, NIT, BITS)..."
             className="pr-10"
           />
@@ -203,14 +257,23 @@ export const RegistrationForm: React.FC = () => {
 
         {/* Autocomplete dropdown options */}
         {isDropdownOpen && collegeSearchText.trim().length >= 2 && (
-          <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-card border border-border rounded-xl shadow-lg max-h-56 overflow-y-auto divide-y divide-border/60">
+          <div
+            id="college-listbox"
+            role="listbox"
+            className="absolute z-50 left-0 right-0 top-full mt-1 bg-card border border-border rounded-xl shadow-lg max-h-56 overflow-y-auto divide-y divide-border/60"
+          >
             {colleges.length > 0 ? (
-              colleges.map((c) => (
+              colleges.map((c, idx) => (
                 <button
                   type="button"
                   key={c.id}
+                  id={`college-option-${idx}`}
+                  role="option"
+                  aria-selected={selectedCollegeId === c.id}
                   onClick={() => handleSelectCollege(c)}
-                  className="w-full text-left p-3 hover:bg-muted text-xs sm:text-sm text-foreground flex items-center justify-between gap-2 transition-colors cursor-pointer"
+                  className={`w-full text-left p-3 text-xs sm:text-sm text-foreground flex items-center justify-between gap-2 transition-colors cursor-pointer ${
+                    focusedCollegeIndex === idx ? 'bg-muted ring-1 ring-primary' : 'hover:bg-muted'
+                  }`}
                 >
                   <div>
                     <p className="font-semibold">{c.name}</p>
@@ -234,7 +297,7 @@ export const RegistrationForm: React.FC = () => {
         )}
 
         {errors.collegeId && (
-          <p className="text-xs text-rose-500">Please select your college from the list</p>
+          <p id="college-error" className="text-xs text-rose-500">Please select your college from the list</p>
         )}
       </div>
 
@@ -242,10 +305,11 @@ export const RegistrationForm: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Graduation Year */}
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-foreground">
+          <label htmlFor="reg-gradyear" className="text-xs font-semibold text-foreground">
             Graduation Year <span className="text-primary">*</span>
           </label>
           <select
+            id="reg-gradyear"
             {...register('graduationYear', { valueAsNumber: true })}
             className="flex h-11 w-full rounded-button border border-input bg-background px-4 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
@@ -259,15 +323,18 @@ export const RegistrationForm: React.FC = () => {
 
         {/* Phone Number */}
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-foreground">
+          <label htmlFor="reg-phone" className="text-xs font-semibold text-foreground">
             WhatsApp Number <span className="text-muted-foreground text-[10px]">(Optional)</span>
           </label>
           <Input
+            id="reg-phone"
+            aria-invalid={!!errors.phone}
+            aria-describedby={errors.phone ? 'phone-error' : undefined}
             placeholder="e.g. +91 9876543210"
             {...register('phone')}
           />
           {errors.phone && (
-            <p className="text-xs text-rose-500">{errors.phone.message}</p>
+            <p id="phone-error" className="text-xs text-rose-500">{errors.phone.message}</p>
           )}
         </div>
       </div>
@@ -275,10 +342,11 @@ export const RegistrationForm: React.FC = () => {
       {/* Referral Code input (if not already applied from URL) */}
       {!refFromUrl && (
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-foreground">
+          <label htmlFor="reg-refcode" className="text-xs font-semibold text-foreground">
             Referral Code <span className="text-muted-foreground text-[10px]">(Optional)</span>
           </label>
           <Input
+            id="reg-refcode"
             placeholder="e.g. AIWX1"
             className="uppercase font-mono"
             {...register('referralCode')}
@@ -304,10 +372,11 @@ export const RegistrationForm: React.FC = () => {
       </Button>
 
       <p className="text-[11px] text-center text-muted-foreground pt-2">
-        🔒 By registering, you agree to receive workshop access links. Your information is never sold or shared.
+        🔒 By registering, you agree to receive workshop links and updates. Your contact info is kept strictly private; peer referrals display a privacy-safe abbreviated name (e.g. First L.) on the campus leaderboard.
       </p>
     </form>
   );
 };
 
 export default RegistrationForm;
+

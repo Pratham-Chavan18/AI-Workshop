@@ -76,12 +76,13 @@ export const ReferralShareCard: React.FC<ReferralShareCardProps> = ({
               Your Unique Referral Code
             </span>
             <p className="font-display font-extrabold text-3xl text-black tracking-wider leading-none mt-1">
-              {referralCode}
+              {referralCode || 'Generating...'}
             </p>
           </div>
           <button
             onClick={handleCopyCode}
-            className="slush-pill px-4 py-2 bg-white text-black hover:bg-slush-mist text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+            disabled={!referralCode}
+            className="slush-pill px-4 py-2 bg-white text-black hover:bg-slush-mist text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {copiedCode ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
             <span>{copiedCode ? 'Copied Code!' : 'Copy Code'}</span>
@@ -97,12 +98,13 @@ export const ReferralShareCard: React.FC<ReferralShareCardProps> = ({
             <input
               type="text"
               readOnly
-              value={referralUrl}
+              value={referralUrl || 'Loading referral URL...'}
               className="flex-1 h-11 px-4 text-xs font-mono bg-slush-mist/50 border border-black rounded-pill text-black select-all focus:outline-none"
             />
             <button
               onClick={handleCopyUrl}
-              className="slush-pill h-11 px-5 bg-black text-white hover:bg-neutral-800 text-xs font-bold shrink-0 flex items-center gap-1.5 cursor-pointer"
+              disabled={!referralUrl}
+              className="slush-pill h-11 px-5 bg-black text-white hover:bg-neutral-800 text-xs font-bold shrink-0 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {copiedUrl ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               <span>{copiedUrl ? 'Copied Link!' : 'Copy Link'}</span>
@@ -113,17 +115,21 @@ export const ReferralShareCard: React.FC<ReferralShareCardProps> = ({
 
       {/* 1-Click WhatsApp Share Button */}
       <div className="pt-6 mt-6 border-t border-black/10">
-        <a
-          href={whatsappUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block w-full"
-        >
-          <button className="slush-pill w-full py-3.5 bg-slush-mint text-black hover:bg-slush-mint/80 text-sm font-bold flex items-center justify-center gap-2 shadow-none transition-transform hover:-translate-y-0.5">
+        {referralUrl ? (
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="slush-pill w-full py-3.5 bg-slush-mint text-black hover:bg-slush-mint/80 text-sm font-bold flex items-center justify-center gap-2 shadow-none transition-transform hover:-translate-y-0.5"
+          >
             <MessageCircle className="w-5 h-5" />
             <span>Share to WhatsApp Groups (1-Click)</span>
-          </button>
-        </a>
+          </a>
+        ) : (
+          <div className="slush-pill w-full py-3.5 bg-neutral-200 text-neutral-500 text-sm font-bold flex items-center justify-center gap-2">
+            <span>Referral link loading...</span>
+          </div>
+        )}
       </div>
     </div>
   );

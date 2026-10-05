@@ -29,9 +29,14 @@ export async function attributeReferral(params: {
     return { credited: false, reason: 'self_referral' };
   }
 
-  // 2. Check already attributed
+  // 2. Check already attributed within this campaign
   const existingReferral = await prisma.referral.findUnique({
-    where: { referredUserId },
+    where: {
+      referredUserId_campaignId: {
+        referredUserId,
+        campaignId,
+      },
+    },
   });
 
   if (existingReferral) {

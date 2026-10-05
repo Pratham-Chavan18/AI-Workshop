@@ -1,22 +1,55 @@
 import { Router } from 'express';
 import {
+  adminLoginHandler,
+  adminLogoutHandler,
+  getAdminMeHandler,
   campaignStatsHandler,
   dailyTrendHandler,
   sourceBreakdownHandler,
   exportRegistrationsHandler,
 } from '../controllers/admin.controller';
-import { requireAdminKey } from '../middleware/adminAuth';
+import {
+  requireAdminSession,
+  requireAdminRole,
+} from '../middleware/adminAuth';
 import { adminRateLimiter } from '../middleware/rateLimiter';
 
 const router = Router();
 
-// Apply auth and rate limiting to all admin endpoints
+// Apply rate limiting to all admin routes
 router.use(adminRateLimiter);
-router.use(requireAdminKey);
 
-router.get('/campaigns/:campaignId/stats', campaignStatsHandler);
-router.get('/campaigns/:campaignId/stats/daily', dailyTrendHandler);
-router.get('/campaigns/:campaignId/stats/sources', sourceBreakdownHandler);
-router.get('/campaigns/:campaignId/export', exportRegistrationsHandler);
+// 1. Authentication endpoints
+router.post('/auth/login', adminLoginHandler);
+router.post('/auth/logout', adminLogoutHandler);
+
+// 2. Protected Session Gatekeeper
+router.use(requireAdminSession);
+
+router.get('/auth/me', getAdminMeHandler);
+
+// 3. Analytics endpoints (Accessible to admin, operator, and viewer roles)
+router.get(
+  '/campaigns/:campaignId/stats',
+  requireAdminRole(['admin', 'operator', 'viewer']),
+  campaignStatsHandler
+);
+router.get(
+  '/campaigns/:campaignId/stats/daily',
+  requireAdminRole(['admin', 'operator', 'viewer']),
+  dailyTrendHandler
+);
+router.get(
+  '/campaigns/:campaignId/stats/sources',
+  requireAdminRole(['admin', 'operator', 'viewer']),
+  sourceBreakdownHandler
+);
+
+// 4. Privileged Data Export endpoint (Accessible strictly to admin and operator roles; viewer rejected)
+router.get(
+  '/campaigns/:campaignId/export',
+  requireAdminRole(['admin', 'operator']),
+  exportRegistrationsHandler
+);
 
 export default router;
