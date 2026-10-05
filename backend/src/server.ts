@@ -1,14 +1,15 @@
 import 'dotenv/config';
 import { app } from './app';
 import { logger } from './middleware/logger';
+import { env } from './config/env';
 
-const PORT = Number(process.env.PORT) || 4000;
+const PORT = env.PORT;
 
 const server = app.listen(PORT, () => {
   logger.info(
     {
       port: PORT,
-      env: process.env.NODE_ENV || 'development',
+      env: env.NODE_ENV,
     },
     'Server successfully started'
   );
@@ -25,7 +26,7 @@ const gracefulShutdown = (signal: string) => {
   setTimeout(() => {
     logger.error('Could not close connections in time, forcefully shutting down');
     process.exit(1);
-  }, 10000);
+  }, env.SHUTDOWN_TIMEOUT_MS);
 };
 
 process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
