@@ -101,18 +101,20 @@ export const HeroSection: React.FC = () => {
           transition={{ duration: 0.5, delay: 0.3 }}
           className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto"
         >
-          <Link to="/register" className="w-full sm:w-auto">
-            <button className="slush-pill w-full sm:w-auto px-8 py-3.5 bg-black text-white hover:bg-neutral-800 text-sm sm:text-base font-bold tracking-[0.032em] flex items-center justify-center gap-2 shadow-none transition-transform hover:-translate-y-0.5">
-              <span>Reserve My Free Seat</span>
-              <ArrowUpRight className="w-5 h-5" />
-            </button>
+          <Link
+            to="/register"
+            className="slush-pill w-full sm:w-auto px-8 py-3.5 bg-black text-white hover:bg-neutral-800 text-sm sm:text-base font-bold tracking-[0.032em] flex items-center justify-center gap-2 shadow-none transition-transform hover:-translate-y-0.5"
+          >
+            <span>Reserve My Free Seat</span>
+            <ArrowUpRight className="w-5 h-5" />
           </Link>
 
-          <Link to="/leaderboard" className="w-full sm:w-auto">
-            <button className="slush-pill w-full sm:w-auto px-8 py-3.5 bg-white text-black hover:bg-slush-mist text-sm sm:text-base font-bold tracking-[0.032em] flex items-center justify-center gap-2 shadow-none transition-transform hover:-translate-y-0.5">
-              <Trophy className="w-4 h-4 text-black" />
-              <span>Campus Leaderboard</span>
-            </button>
+          <Link
+            to="/leaderboard"
+            className="slush-pill w-full sm:w-auto px-8 py-3.5 bg-white text-black hover:bg-slush-mist text-sm sm:text-base font-bold tracking-[0.032em] flex items-center justify-center gap-2 shadow-none transition-transform hover:-translate-y-0.5"
+          >
+            <Trophy className="w-4 h-4 text-black" />
+            <span>Campus Leaderboard</span>
           </Link>
         </motion.div>
 

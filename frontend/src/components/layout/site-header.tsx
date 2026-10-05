@@ -12,42 +12,44 @@ export const SiteHeader: React.FC = () => {
       <MarqueeStrip />
 
       {/* Main Nav Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
         {/* Slush Circular Brand Logo Mark */}
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-full border border-black bg-white flex items-center justify-center font-display font-extrabold text-xl text-black transition-transform group-hover:scale-105">
+        <Link to="/" className="flex items-center gap-1.5 sm:gap-3 shrink-0 group">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-black bg-white flex items-center justify-center font-display font-extrabold text-base sm:text-xl text-black transition-transform group-hover:scale-105 shrink-0">
             AI
           </div>
-          <div className="flex items-center gap-2">
-            <span className="font-display font-extrabold text-2xl tracking-tight text-black">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="font-display font-extrabold text-base sm:text-2xl tracking-tight text-black whitespace-nowrap">
               AI WORKSHOP
             </span>
-            <span className="hidden sm:inline-block px-2.5 py-0.5 text-[11px] font-bold uppercase rounded-full bg-slush-mint border border-black text-black">
+            <span className="hidden md:inline-block px-2.5 py-0.5 text-[11px] font-bold uppercase rounded-full bg-slush-mint border border-black text-black">
               NxtWave
             </span>
           </div>
         </Link>
 
         {/* Slush Pill Navigation Links & Filled CTA */}
-        <nav className="flex items-center gap-2 sm:gap-3">
-          <Link to="/leaderboard">
-            <button
-              className={`slush-pill px-4 py-2 text-xs sm:text-sm font-bold tracking-[0.03em] flex items-center gap-1.5 transition-colors ${
-                location.pathname === '/leaderboard'
-                  ? 'bg-slush-sunburst text-black'
-                  : 'bg-white text-black hover:bg-slush-mist'
-              }`}
-            >
-              <Trophy className="w-4 h-4 text-black" />
-              <span>Campus Leaderboard</span>
-            </button>
+        <nav className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          <Link
+            to="/leaderboard"
+            className={`slush-pill px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-bold tracking-[0.03em] flex items-center gap-1 sm:gap-1.5 transition-colors whitespace-nowrap ${
+              location.pathname === '/leaderboard'
+                ? 'bg-slush-sunburst text-black'
+                : 'bg-white text-black hover:bg-slush-mist'
+            }`}
+          >
+            <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-black shrink-0" />
+            <span className="hidden sm:inline">Campus Leaderboard</span>
+            <span className="sm:hidden">Leaderboard</span>
           </Link>
 
-          <Link to="/register">
-            <button className="slush-pill px-5 py-2 text-xs sm:text-sm font-bold tracking-[0.03em] bg-black text-white hover:bg-neutral-800 flex items-center gap-1.5 transition-all">
-              <span>Register Free</span>
-              <ArrowUpRight className="w-4 h-4" />
-            </button>
+          <Link
+            to="/register"
+            className="slush-pill px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold tracking-[0.03em] bg-black text-white hover:bg-neutral-800 flex items-center gap-1 sm:gap-1.5 transition-all whitespace-nowrap"
+          >
+            <span className="hidden sm:inline">Register Free</span>
+            <span className="sm:hidden">Register</span>
+            <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
           </Link>
         </nav>
       </div>

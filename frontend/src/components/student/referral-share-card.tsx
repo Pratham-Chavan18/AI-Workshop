@@ -15,13 +15,24 @@ export const ReferralShareCard: React.FC<ReferralShareCardProps> = ({
   referralCount,
   goal,
 }) => {
-  const [copied, setCopied] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedUrl, setCopiedUrl] = useState(false);
 
-  const handleCopy = async () => {
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(referralCode);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy referral code', err);
+    }
+  };
+
+  const handleCopyUrl = async () => {
     try {
       await navigator.clipboard.writeText(referralUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setCopiedUrl(true);
+      setTimeout(() => setCopiedUrl(false), 2000);
     } catch (err) {
       console.error('Failed to copy referral link', err);
     }
@@ -69,11 +80,11 @@ export const ReferralShareCard: React.FC<ReferralShareCardProps> = ({
             </p>
           </div>
           <button
-            onClick={handleCopy}
-            className="slush-pill px-4 py-2 bg-white text-black hover:bg-slush-mist text-xs font-bold flex items-center gap-1.5 transition-all"
+            onClick={handleCopyCode}
+            className="slush-pill px-4 py-2 bg-white text-black hover:bg-slush-mist text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
           >
-            {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
-            <span>{copied ? 'Copied!' : 'Copy Code'}</span>
+            {copiedCode ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+            <span>{copiedCode ? 'Copied Code!' : 'Copy Code'}</span>
           </button>
         </div>
 
@@ -90,11 +101,11 @@ export const ReferralShareCard: React.FC<ReferralShareCardProps> = ({
               className="flex-1 h-11 px-4 text-xs font-mono bg-slush-mist/50 border border-black rounded-pill text-black select-all focus:outline-none"
             />
             <button
-              onClick={handleCopy}
-              className="slush-pill h-11 px-5 bg-black text-white hover:bg-neutral-800 text-xs font-bold shrink-0 flex items-center gap-1.5"
+              onClick={handleCopyUrl}
+              className="slush-pill h-11 px-5 bg-black text-white hover:bg-neutral-800 text-xs font-bold shrink-0 flex items-center gap-1.5 cursor-pointer"
             >
-              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              <span>{copied ? 'Copied' : 'Copy Link'}</span>
+              {copiedUrl ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              <span>{copiedUrl ? 'Copied Link!' : 'Copy Link'}</span>
             </button>
           </div>
         </div>
