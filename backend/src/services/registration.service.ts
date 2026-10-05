@@ -109,7 +109,7 @@ export async function registerStudent(input: RegistrationInput): Promise<Registe
     const newReferralCode = await generateReferralCode();
 
     try {
-      createdUser = await prisma.$transaction(async (tx) => {
+      createdUser = await prisma.$transaction(async (tx: any) => {
         const user = await tx.user.create({
           data: {
             campaignId: campaign.id,

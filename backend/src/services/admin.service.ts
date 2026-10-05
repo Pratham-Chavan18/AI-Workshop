@@ -101,7 +101,7 @@ export async function getDailyRegistrationTrend(
       ORDER BY date ASC
     `;
 
-    return rows.map((r) => ({
+    return rows.map((r: any) => ({
       date: r.date,
       count: Number(r.count),
     }));
@@ -117,7 +117,7 @@ export async function getSourceBreakdown(campaignId: string): Promise<SourceBrea
     _count: { id: true },
   });
 
-  return groups.map((g) => ({
+  return groups.map((g: any) => ({
     source: g.source,
     count: g._count.id,
   }));
@@ -153,7 +153,7 @@ export async function getExportDataChunk(
     orderBy: { createdAt: 'asc' },
   });
 
-  return users.map((u) => ({
+  return users.map((u: any) => ({
     id: u.id,
     fullName: u.fullName,
     email: u.email,

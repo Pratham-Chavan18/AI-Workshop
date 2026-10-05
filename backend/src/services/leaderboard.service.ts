@@ -55,7 +55,7 @@ export async function getCampusLeaderboard(
     LIMIT ${limit}
   `;
 
-  return rows.map((r) => ({
+  return rows.map((r: any) => ({
     rank: Number(r.rank),
     collegeId: r.collegeId,
     collegeName: r.collegeName,
@@ -98,7 +98,7 @@ export async function getReferrerLeaderboard(
     LIMIT ${limit}
   `;
 
-  return rows.map((r) => ({
+  return rows.map((r: any) => ({
     rank: Number(r.rank),
     displayName: formatDisplayName(r.fullName),
     collegeName: r.collegeName,
