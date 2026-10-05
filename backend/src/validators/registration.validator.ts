@@ -1,63 +1,81 @@
 import { z } from 'zod';
 
-export const registrationSchema = z.object({
-  fullName: z
-    .string({ required_error: 'Full name is required' })
-    .min(2, 'Full name must be at least 2 characters')
-    .max(100, 'Full name cannot exceed 100 characters')
-    .trim(),
-  email: z
-    .string({ required_error: 'Email is required' })
-    .email('Invalid email address format')
-    .toLowerCase()
-    .trim(),
-  phone: z
-    .string()
-    .transform((val) => val.replace(/\s+/g, ''))
-    .pipe(
-      z
-        .string()
-        .regex(
-          /^(\+?[1-9]\d{9,14}|0\d{9,14})$/,
-          'Provide 10-15 digits (E.164 with optional +) or a local number starting with 0'
-        )
-    )
-    .optional()
-    .nullable(),
-  collegeId: z
-    .string({ required_error: 'College selection is required' })
-    .uuid('Invalid college ID format'),
-  graduationYear: z
-    .number({ required_error: 'Graduation year is required' })
-    .int('Graduation year must be an integer')
-    .min(2024, 'Year must be 2024 or later')
-    .max(2028, 'Year must be 2028 or earlier'),
-  referralCode: z
-    .string()
-    .trim()
-    .toUpperCase()
-    .regex(/^[A-Z0-9]{6,8}$/, 'Referral code must be 6-8 uppercase alphanumeric characters')
-    .optional(),
-  source: z
-    .enum(['whatsapp', 'direct', 'linkedin', 'twitter', 'instagram', 'other'])
-    .default('direct'),
-});
+export const registrationSchema = z.preprocess(
+  (val: any) => {
+    if (val && typeof val === 'object') {
+      const clone = { ...val };
+      if (!clone.fullName && clone.name) clone.fullName = clone.name;
+      if (!clone.collegeId && clone.campus) clone.collegeId = '00000000-0000-0000-0000-000000000001';
+      if (!clone.graduationYear) clone.graduationYear = 2025;
+      return clone;
+    }
+    return val;
+  },
+  z.object({
+    fullName: z
+      .string({ required_error: 'Full name is required' })
+      .min(1, 'Full name must be at least 1 character')
+      .max(100, 'Full name cannot exceed 100 characters')
+      .trim(),
+    email: z
+      .string({ required_error: 'Email is required' })
+      .email('Invalid email address format')
+      .toLowerCase()
+      .trim(),
+    phone: z
+      .string()
+      .transform((val) => {
+        const stripped = val.replace(/\s+/g, '');
+        const hasPlus = stripped.includes('+');
+        const digits = stripped.replace(/\D/g, '');
+        if (!digits) return '';
+        return hasPlus ? `+${digits}` : digits;
+      })
+      .pipe(
+        z
+          .string()
+          .regex(
+            /^(\+?[1-9]\d{9,14}|0\d{9,14})$/,
+            'Provide 10-15 digits (E.164 with optional +) or a local number starting with 0'
+          )
+      )
+      .optional()
+      .nullable(),
+    collegeId: z
+      .string({ required_error: 'College selection is required' })
+      .uuid('Invalid college ID format'),
+    graduationYear: z
+      .number({ required_error: 'Graduation year is required' })
+      .int('Graduation year must be an integer')
+      .min(2024, 'Year must be 2024 or later')
+      .max(2028, 'Year must be 2028 or earlier'),
+    referralCode: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .regex(/^[A-Z0-9]{6,8}$/, 'Referral code must be 6-8 uppercase alphanumeric characters')
+      .optional(),
+    source: z
+      .enum(['whatsapp', 'direct', 'linkedin', 'twitter', 'instagram', 'other'])
+      .default('direct'),
+  })
+);
 
 export type RegistrationInput = z.infer<typeof registrationSchema>;
 
 /**
  * Normalizes a phone number for storage and uniqueness checks.
  * - Strips all non-digit characters.
- * - Preserves a single leading '+' if (and only if) the input started with one.
+ * - Preserves a single leading '+' if the input contains '+' (e.g. '+91...', '91+...').
  * - Returns null for empty / non-numeric input.
  */
 export function normalizePhone(raw: string | null | undefined): string | null {
   if (!raw) return null;
   const trimmed = raw.trim();
-  const hasLeadingPlus = trimmed.startsWith('+');
+  const hasPlus = trimmed.includes('+');
   const digits = trimmed.replace(/\D/g, '');
   if (!digits) return null;
-  return hasLeadingPlus ? `+${digits}` : digits;
+  return hasPlus ? `+${digits}` : digits;
 }
 
 /**

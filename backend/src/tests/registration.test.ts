@@ -22,6 +22,15 @@ describe('Registration Validator & API Tests', () => {
     expect(normalized.emailNormalized).toBe('pratham@gmail.com');
     expect(normalized.phoneNormalized).toBe('+919876543210');
     expect(normalized.fullName).toBe('Pratham Chavan');
+
+    // CONCERN G: Verify email normalization lowercases mixed-case email
+    const mixedCaseInput: any = {
+      fullName: 'Foo Bar',
+      email: 'Foo@BAR.com',
+      collegeId: '123e4567-e89b-12d3-a456-426614174000',
+      graduationYear: 2025,
+    };
+    expect(normalizeRegistration(registrationSchema.parse(mixedCaseInput)).emailNormalized).toBe('foo@bar.com');
   });
 
   describe('normalizePhone helper unit tests', () => {
@@ -29,8 +38,8 @@ describe('Registration Validator & API Tests', () => {
       expect(normalizePhone('+91 98765 43210')).toBe('+919876543210');
     });
 
-    it('should strip plus if not at the start', () => {
-      expect(normalizePhone('91+9876543210')).toBe('919876543210');
+    it('should normalize misplaced plus to leading plus for consistent collision', () => {
+      expect(normalizePhone('91+9876543210')).toBe('+919876543210');
     });
 
     it('should preserve only a single leading plus', () => {
