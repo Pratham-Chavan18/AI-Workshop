@@ -1,11 +1,13 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import { z } from 'zod';
 import { prisma } from '../lib/prisma';
-import { notFound } from '../utils/errors';
+import { notFound, validationError } from '../utils/errors';
+import { generalRateLimiter } from '../middleware/rateLimiter';
 
 const router = Router();
 
 // GET /api/v1/campaigns/active - get current active campaign info
-router.get('/active', async (_req: Request, res: Response, next: NextFunction) => {
+router.get('/active', generalRateLimiter, async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const campaign = await prisma.campaign.findFirst({
       where: { status: 'active' },
@@ -31,9 +33,12 @@ router.get('/active', async (_req: Request, res: Response, next: NextFunction) =
 });
 
 // GET /api/v1/campaigns/:campaignId/stats
-router.get('/:campaignId/stats', async (req: Request, res: Response, next: NextFunction) => {
+router.get('/:campaignId/stats', generalRateLimiter, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { campaignId } = req.params;
+    if (!z.string().uuid().safeParse(campaignId).success) {
+      throw validationError('Invalid campaign ID format. Must be a valid UUID.');
+    }
     const campaign = await prisma.campaign.findUnique({
       where: { id: campaignId },
       include: {

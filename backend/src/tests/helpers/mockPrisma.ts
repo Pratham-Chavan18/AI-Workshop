@@ -73,23 +73,30 @@ export const mockPrisma = {
     }
     return Promise.resolve(cb);
   }),
-  $queryRaw: vi.fn().mockResolvedValue([
-    {
-      rank: 1,
-      collegeId: 'college-1',
-      collegeName: 'IIT Bombay',
-      city: 'Mumbai',
-      state: 'Maharashtra',
-      registrations: 25,
-    },
-    {
-      rank: 1,
-      userId: 'user-1',
-      fullName: 'Rahul Sharma',
-      collegeName: 'IIT Bombay',
-      referralCount: 4,
-    },
-  ]),
+  $queryRaw: vi.fn().mockImplementation((strings: TemplateStringsArray | string) => {
+    const query = typeof strings === 'string' ? strings : Array.isArray(strings) ? strings.join(' ') : '';
+    if (query.includes('referralCount') || query.includes('Referral') || query.includes('fullName')) {
+      return Promise.resolve([
+        {
+          rank: 1,
+          userId: 'user-1',
+          fullName: 'Rahul Sharma',
+          collegeName: 'IIT Bombay',
+          referralCount: 4,
+        },
+      ]);
+    }
+    return Promise.resolve([
+      {
+        rank: 1,
+        collegeId: 'college-1',
+        collegeName: 'IIT Bombay',
+        city: 'Mumbai',
+        state: 'Maharashtra',
+        registrations: 25,
+      },
+    ]);
+  }),
 };
 
 vi.mock('../../lib/prisma', () => ({

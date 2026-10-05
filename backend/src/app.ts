@@ -16,9 +16,24 @@ export const createApp = (): Application => {
 
   // Security middleware
   app.use(helmet());
+  // CORS configuration
+  const allowedOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
+    : ['http://localhost:5173', 'http://localhost:3000'];
+
   app.use(
     cors({
-      origin: process.env.CORS_ORIGIN || '*',
+      origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps, curl, server-to-server)
+        if (!origin) return callback(null, true);
+        if (
+          allowedOrigins.includes(origin) ||
+          (process.env.NODE_ENV === 'development' && origin.startsWith('http://localhost:'))
+        ) {
+          return callback(null, true);
+        }
+        return callback(new Error('Blocked by CORS policy'));
+      },
       credentials: true,
     })
   );
