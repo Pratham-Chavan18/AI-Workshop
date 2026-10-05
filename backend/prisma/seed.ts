@@ -55,15 +55,15 @@ async function main() {
   console.log(`✅ Upserted ${collegesCount} colleges.`);
 
   // 3. Seed default Admin User
-  const defaultAdminPassword = process.env.ADMIN_DEFAULT_PASSWORD || 'Admin@ai60!';
+  const defaultAdminPassword = process.env.ADMIN_DEFAULT_PASSWORD || 'Admin@aiworkshop!';
   const admin = await prisma.adminUser.upsert({
-    where: { email: 'admin@ai60.nxtwave.com' },
+    where: { email: 'admin@aiworkshop.nxtwave.com' },
     update: {
       passwordHash: hashPassword(defaultAdminPassword),
       role: 'operator',
     },
     create: {
-      email: 'admin@ai60.nxtwave.com',
+      email: 'admin@aiworkshop.nxtwave.com',
       passwordHash: hashPassword(defaultAdminPassword),
       role: 'operator',
     },

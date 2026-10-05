@@ -30,7 +30,7 @@ export const ReferralShareCard: React.FC<ReferralShareCardProps> = ({
   };
 
   const whatsappMessage = encodeURIComponent(
-    `🚀 Join me for a FREE online workshop: "Build Your First AI Project in 60 Minutes"!\n\n` +
+    `🚀 Join me for the FREE AI Workshop: "Build Your First AI Project in 60 Minutes"!\n\n` +
     `🎓 It's tailored for final-year engineering students to launch a live AI project for their resume.\n\n` +
     `Claim your free seat here 👇\n${referralUrl}\n\n` +
     `Use my referral link to represent our college on the national leaderboard! 🏆`

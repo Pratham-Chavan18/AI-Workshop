@@ -12,10 +12,10 @@ export const SiteFooter: React.FC = () => {
             <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-white">
               <Sparkles className="w-4 h-4" />
             </div>
-            <span className="font-bold text-base tracking-tight">AI 60 × 500 Campaign</span>
+            <span className="font-bold text-base tracking-tight">AI Workshop</span>
           </div>
           <p className="text-xs text-muted-foreground max-w-sm">
-            Powered by NxtWave. Accelerating 500 final-year engineers into hands-on AI builders.
+            Powered by NxtWave. Accelerating final-year engineers into hands-on AI builders.
           </p>
         </div>
 

@@ -12,7 +12,7 @@ export const RegistrationPage: React.FC = () => {
   const refCode = searchParams.get('ref');
 
   useEffect(() => {
-    document.title = 'Register Free | AI 60×500 Workshop | NxtWave';
+    document.title = 'Register Free | AI Workshop | NxtWave';
   }, []);
 
   return (

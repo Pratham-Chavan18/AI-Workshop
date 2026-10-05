@@ -1,7 +1,7 @@
-# AI 60 × 500 — Campus Referral & Leaderboard
+# AI Workshop — Campus Referral & Leaderboard
 
 ## Project Context
-This repository contains the full source code and documentation for the **AI 60 × 500** campaign platform built for NxtWave. The goal is to acquire 500 verified final-year engineering student registrations for the free online workshop *"Build Your First AI Project in 60 Minutes"* via a viral campus referral loop and public college leaderboard.
+This repository contains the full source code and documentation for the **AI Workshop** platform built for NxtWave. The goal is to acquire 500 verified final-year engineering student registrations for the free online workshop *"Build Your First AI Project in 60 Minutes"* via a viral campus referral loop and public college leaderboard.
 
 ## Key Documents
 - [PROJECT.md](file:///d:/Project/Refferal%20tracker/.planning/PROJECT.md): Project definition, core value, active requirements, and key decisions.

@@ -74,7 +74,7 @@ export const exportRegistrationsHandler = async (
       res.setHeader('Content-Type', 'application/json');
       res.setHeader(
         'Content-Disposition',
-        `attachment; filename="ai60-registrations-${Date.now()}.json"`
+        `attachment; filename="ai-workshop-registrations-${Date.now()}.json"`
       );
       res.status(200).json({ count: data.length, data });
       return;
@@ -84,7 +84,7 @@ export const exportRegistrationsHandler = async (
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename="ai60-registrations-${Date.now()}.csv"`
+      `attachment; filename="ai-workshop-registrations-${Date.now()}.csv"`
     );
 
     const headers = [

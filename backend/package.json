@@ -1,8 +1,8 @@
 {
-  "name": "@ai60/backend",
+  "name": "ai-workshop-backend",
   "version": "1.0.0",
   "private": true,
-  "description": "Backend API for AI 60 x 500 Campus Referral & Leaderboard",
+  "description": "Backend API for AI Workshop",
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",

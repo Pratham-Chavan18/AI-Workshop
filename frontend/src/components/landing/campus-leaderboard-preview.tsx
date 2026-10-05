@@ -142,7 +142,7 @@ export const CampusLeaderboardPreview: React.FC = () => {
 
             <CardFooter className="bg-canvas-soft/80 border-t border-border/80 flex items-center justify-between p-4">
               <span className="text-xs text-muted-foreground">
-                Represent your campus in the AI 60 × 500 challenge
+                Represent your campus in the AI Workshop challenge
               </span>
               <Link to="/leaderboard">
                 <Button variant="ghost" size="sm" className="gap-1 text-primary hover:text-primary-deep text-xs font-semibold">

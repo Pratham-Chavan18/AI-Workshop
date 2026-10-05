@@ -1,8 +1,8 @@
 {
-  "name": "ai60-campus-referral",
+  "name": "ai-workshop",
   "version": "1.0.0",
   "private": true,
-  "description": "AI 60 × 500 — Campus Referral & Leaderboard Platform",
+  "description": "AI Workshop — Campus Referral & Leaderboard Platform",
   "workspaces": [
     "backend",
     "frontend"

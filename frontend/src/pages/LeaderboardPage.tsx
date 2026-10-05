@@ -16,7 +16,7 @@ export const LeaderboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'campuses' | 'referrers'>('campuses');
 
   useEffect(() => {
-    document.title = 'Campus Leaderboard | AI 60×500 | NxtWave';
+    document.title = 'Campus Leaderboard | AI Workshop | NxtWave';
   }, []);
 
   const { data: totalData } = useQuery<{ total: number }>({

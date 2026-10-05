@@ -268,7 +268,7 @@ export const RegistrationForm: React.FC = () => {
             Referral Code <span className="text-muted-foreground text-[10px]">(Optional)</span>
           </label>
           <Input
-            placeholder="e.g. AI60X1"
+            placeholder="e.g. AIWX1"
             className="uppercase font-mono"
             {...register('referralCode')}
           />

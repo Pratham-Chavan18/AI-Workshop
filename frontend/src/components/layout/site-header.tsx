@@ -23,7 +23,7 @@ export const SiteHeader: React.FC = () => {
           </div>
           <div className="flex items-baseline gap-1.5">
             <span className="font-extrabold text-lg tracking-tight text-foreground">
-              AI 60 <span className="text-primary font-normal">×</span> 500
+              AI Workshop
             </span>
             <Badge variant="default" className="hidden sm:inline-flex text-[10px] py-0 px-2">
               NxtWave

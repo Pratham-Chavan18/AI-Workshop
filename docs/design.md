@@ -1,8 +1,8 @@
-# AI 60 × 500 — Design System & UI/UX Specification
+# AI Workshop — Design System & UI/UX Specification
 
 ## 1. Purpose
 
-This document is the visual and interaction contract for the **AI 60 × 500 Campus Referral & Leaderboard** application.
+This document is the visual and interaction contract for the **AI Workshop** application.
 
 The application should feel like a polished modern developer product, not a generic webinar landing page.
 
@@ -236,7 +236,7 @@ Page-specific compositions belong outside `/components/ui`.
 
 The supplied design reference contains a reusable scroll-globe landing composition and a globe primitive. It uses Tailwind utility classes, `cn()`, section props, and a reusable `Globe` component. fileciteturn0file0L16-L39 fileciteturn0file0L349-L400
 
-Use these components as inspiration and reusable primitives, but adapt the content to the AI 60 × 500 campaign.
+Use these components as inspiration and reusable primitives, but adapt the content to the AI Workshop campaign.
 
 Do not copy a demo's generic marketing copy into production.
 
@@ -1220,7 +1220,7 @@ An organizer knows:
 
 Do not:
 
-- Build a generic template without adapting it to AI 60 × 500
+- Build a generic template without adapting it to AI Workshop
 - Recreate shadcn primitives unnecessarily
 - Put page-specific components inside `/components/ui`
 - Hard-code leaderboard data in production

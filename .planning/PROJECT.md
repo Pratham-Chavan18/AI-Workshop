@@ -1,4 +1,4 @@
-# AI 60 × 500 — Campus Referral & Leaderboard
+# AI Workshop — Campus Referral & Leaderboard
 
 ## What This Is
 

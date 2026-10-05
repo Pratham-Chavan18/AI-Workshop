@@ -43,7 +43,7 @@ export const ReferralProgressCard: React.FC<ReferralProgressCardProps> = ({
     if (referralCount === 2) {
       return 'Almost there! Just 1 more friend needed to unlock your reward pack 🔥';
     }
-    return "🏆 You're an official AI 60×500 Campus Ambassador! Priority Q&A unlocked.";
+    return "🏆 You're an official AI Workshop Campus Ambassador! Priority Q&A unlocked.";
   };
 
   return (

@@ -1,7 +1,7 @@
-# AI 60 × 500 — Campus Referral & Leaderboard
+# AI Workshop — Campus Referral & Leaderboard
 
 ## Project Goal
-Build a lightweight campaign platform that helps NxtWave acquire 500 final-year engineering student registrations for the free workshop **“Build Your First AI Project in 60 Minutes.”**
+Build a lightweight campaign platform that helps NxtWave acquire 500 final-year engineering student registrations for the free online workshop **“Build Your First AI Project in 60 Minutes.”**
 
 The core growth loop is:
 
@@ -37,7 +37,7 @@ The core growth loop is:
 ## Suggested Project Structure
 
 ```text
-ai60-campus-referral/
+ai-workshop/
 ├── frontend/
 ├── backend/
 ├── docs/

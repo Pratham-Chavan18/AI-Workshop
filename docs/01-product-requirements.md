@@ -1,7 +1,7 @@
 # Product Requirements Document (PRD)
 
 ## 1. Product Name
-**AI 60 × 500 — Campus Referral & Leaderboard**
+**AI Workshop** (Campaign: *Build Your First AI Project in 60 Minutes*)
 
 ## 2. Problem
 NxtWave needs 500 final-year engineering students to register for a free online workshop in only seven days with a budget of ₹2,000. Traditional advertising may create awareness but gives limited leverage at this budget. The product therefore needs to turn registrations into a distribution mechanism.

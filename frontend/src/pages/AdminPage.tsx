@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Shield, KeyRound, Download, RefreshCw, LogOut, AlertCircle, Loader2 } from 'lucide-react';
 
-const ADMIN_STORAGE_KEY = 'ai60_admin_api_key';
+const ADMIN_STORAGE_KEY = 'ai_workshop_admin_api_key';
 
 export const AdminPage: React.FC = () => {
   const [adminKey, setAdminKey] = useState<string>(() => {
@@ -24,7 +24,7 @@ export const AdminPage: React.FC = () => {
   const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
-    document.title = 'Admin Analytics Dashboard | AI 60×500 | NxtWave';
+    document.title = 'Admin Analytics Dashboard | AI Workshop | NxtWave';
   }, []);
 
   // 1. Fetch active campaign ID
@@ -131,7 +131,7 @@ export const AdminPage: React.FC = () => {
       const url = window.URL.createObjectURL(new Blob([res.data], { type: 'text/csv' }));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `ai60-registrations-${new Date().toISOString().slice(0, 10)}.csv`);
+      link.setAttribute('download', `ai-workshop-registrations-${new Date().toISOString().slice(0, 10)}.csv`);
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -206,11 +206,11 @@ export const AdminPage: React.FC = () => {
                     Campaign Live
                   </Badge>
                   <span className="text-xs text-muted-foreground font-mono">
-                    ID: {campaignId || 'ai60-active'}
+                    ID: {campaignId || 'ai-workshop-active'}
                   </span>
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight mt-1">
-                  AI 60 × 500 Campaign Command Center
+                  AI Workshop Campaign Command Center
                 </h1>
               </div>
 

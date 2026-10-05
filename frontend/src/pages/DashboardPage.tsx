@@ -16,7 +16,7 @@ export const DashboardPage: React.FC = () => {
   const initialCode = searchParams.get('code') || '';
 
   useEffect(() => {
-    document.title = 'Your Referral Dashboard | AI 60×500 | NxtWave';
+    document.title = 'Your Referral Dashboard | AI Workshop | NxtWave';
   }, []);
 
   const { data: stats, isLoading, error, refetch } = useQuery({
@@ -26,7 +26,7 @@ export const DashboardPage: React.FC = () => {
     refetchInterval: 30_000, // Live poll every 30 seconds
   });
 
-  const referralCode = stats?.referralCode || initialCode || 'AI60CODE';
+  const referralCode = stats?.referralCode || initialCode || 'AIWCODE';
   const referralUrl =
     stats?.referralUrl || `${window.location.origin}/register?ref=${referralCode}`;
   const referralCount = stats?.referralCount ?? 0;

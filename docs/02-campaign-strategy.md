@@ -1,7 +1,7 @@
 # Campaign Strategy
 
 ## Campaign
-**AI 60 × 500 Campus Challenge**
+**AI Workshop — Campus Challenge**
 
 ### Message
 > Build your first AI project in 60 minutes. One hour. One real project. Zero cost.
