@@ -1,8 +1,9 @@
 import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { httpLogger } from './middleware/logger';
+import { httpLogger, logger } from './middleware/logger';
 import { errorHandler } from './middleware/errorHandler';
+import { env } from './config/env';
 import healthRouter from './routes/health';
 import collegesRouter from './routes/colleges';
 import registrationsRouter from './routes/registrations';
@@ -16,20 +17,29 @@ export const createApp = (): Application => {
 
   // Security middleware
   app.use(helmet());
+
   // CORS configuration
-  const allowedOrigins = process.env.CORS_ORIGIN
-    ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim())
-    : ['http://localhost:5173', 'http://localhost:3000'];
+  if (env.NODE_ENV === 'development' && !env.CORS_ORIGIN) {
+    logger.warn('CORS_ORIGIN is unset in development mode; defaulting allowed origins to ["http://localhost:5173"]');
+  }
+
+  const configuredOrigins = env.CORS_ORIGIN
+    ? env.CORS_ORIGIN.split(',').map((o) => o.trim()).filter(Boolean)
+    : [];
+
+  const allowedOrigins =
+    env.NODE_ENV === 'development'
+      ? Array.from(new Set([...configuredOrigins, 'http://localhost:5173']))
+      : configuredOrigins.length > 0
+        ? configuredOrigins
+        : ['http://localhost:5173'];
 
   app.use(
     cors({
       origin: (origin, callback) => {
         // Allow requests with no origin (like mobile apps, curl, server-to-server)
         if (!origin) return callback(null, true);
-        if (
-          allowedOrigins.includes(origin) ||
-          (process.env.NODE_ENV === 'development' && origin.startsWith('http://localhost:'))
-        ) {
+        if (allowedOrigins.includes(origin)) {
           return callback(null, true);
         }
         return callback(new Error('Blocked by CORS policy'));
