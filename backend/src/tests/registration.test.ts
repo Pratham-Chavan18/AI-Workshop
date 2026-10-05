@@ -20,8 +20,58 @@ describe('Registration Validator & API Tests', () => {
     const normalized = normalizeRegistration(parsed);
 
     expect(normalized.emailNormalized).toBe('pratham@gmail.com');
-    expect(normalized.phoneNormalized).toBe('919876543210');
+    expect(normalized.phoneNormalized).toBe('+919876543210');
     expect(normalized.fullName).toBe('Pratham Chavan');
+  });
+
+  describe('Phone number validation & normalization', () => {
+    const basePayload = {
+      fullName: 'Pratham Chavan',
+      email: 'student@example.com',
+      collegeId: '123e4567-e89b-12d3-a456-426614174000',
+      graduationYear: 2025,
+    };
+
+    it('should accept E.164 phone numbers with leading plus: +919876543210', () => {
+      const parsed = registrationSchema.parse({ ...basePayload, phone: '+919876543210' });
+      const normalized = normalizeRegistration(parsed);
+      expect(normalized.phoneNormalized).toBe('+919876543210');
+    });
+
+    it('should accept local phone numbers with leading zero: 09876543210', () => {
+      const parsed = registrationSchema.parse({ ...basePayload, phone: '09876543210' });
+      const normalized = normalizeRegistration(parsed);
+      expect(normalized.phoneNormalized).toBe('09876543210');
+    });
+
+    it('should reject invalid non-numeric phone: abc123', () => {
+      const result = registrationSchema.safeParse({ ...basePayload, phone: 'abc123' });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('Referral code normalization', () => {
+    const basePayload = {
+      fullName: 'Pratham Chavan',
+      email: 'student@example.com',
+      collegeId: '123e4567-e89b-12d3-a456-426614174000',
+      graduationYear: 2025,
+    };
+
+    it('should normalize lowercase referral codes to uppercase', () => {
+      const parsed = registrationSchema.parse({ ...basePayload, referralCode: 'ab12cd' });
+      expect(parsed.referralCode).toBe('AB12CD');
+    });
+
+    it('should normalize whitespace-padded referral codes', () => {
+      const parsed = registrationSchema.parse({ ...basePayload, referralCode: '  AI60X1  ' });
+      expect(parsed.referralCode).toBe('AI60X1');
+    });
+
+    it('should normalize lowercase and whitespace-padded referral code: "  ab12cd "', () => {
+      const parsed = registrationSchema.parse({ ...basePayload, referralCode: '  ab12cd ' });
+      expect(parsed.referralCode).toBe('AB12CD');
+    });
   });
 
   it('should reject invalid email addresses with ZodError', () => {
