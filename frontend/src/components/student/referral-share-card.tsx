@@ -4,7 +4,7 @@ import { Share2, Copy, Check, MessageCircle } from 'lucide-react';
 
 export interface ReferralShareCardProps {
   referralCode: string;
-  referralUrl: string;
+  referralUrl?: string;
   referralCount: number;
   goal: number;
 }
@@ -18,6 +18,11 @@ export const ReferralShareCard: React.FC<ReferralShareCardProps> = ({
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
 
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const finalReferralUrl = referralCode
+    ? `${baseUrl}/register?ref=${referralCode}`
+    : referralUrl || '';
+
   const handleCopyCode = async () => {
     try {
       await navigator.clipboard.writeText(referralCode);
@@ -30,7 +35,7 @@ export const ReferralShareCard: React.FC<ReferralShareCardProps> = ({
 
   const handleCopyUrl = async () => {
     try {
-      await navigator.clipboard.writeText(referralUrl);
+      await navigator.clipboard.writeText(finalReferralUrl);
       setCopiedUrl(true);
       setTimeout(() => setCopiedUrl(false), 2000);
     } catch (err) {
@@ -41,11 +46,11 @@ export const ReferralShareCard: React.FC<ReferralShareCardProps> = ({
   const whatsappMessage = encodeURIComponent(
     `🚀 Join me for the FREE AI Workshop: "Build Your First AI Project in 60 Minutes"!\n\n` +
     `🎓 It's tailored for final-year engineering students to launch a live AI project for their resume.\n\n` +
-    `Claim your free seat here 👇\n${referralUrl}\n\n` +
+    `Claim your free seat here 👇\n${finalReferralUrl}\n\n` +
     `Use my referral link to represent our college on the national leaderboard! 🏆`
   );
 
-  const whatsappUrl = `https://wa.me/?text=${whatsappMessage}`;
+  const whatsappUrl = `https://api.whatsapp.com/send?text=${whatsappMessage}`;
 
   return (
     <div className="slush-card h-full bg-white border border-black p-6 sm:p-8 flex flex-col justify-between shadow-none">
@@ -98,15 +103,15 @@ export const ReferralShareCard: React.FC<ReferralShareCardProps> = ({
             <input
               type="text"
               readOnly
-              value={referralUrl || 'Loading referral URL...'}
+              value={finalReferralUrl || 'Loading referral URL...'}
               className="flex-1 h-11 px-4 text-xs font-mono bg-slush-mist/50 border border-black rounded-pill text-black select-all focus:outline-none"
             />
             <button
               onClick={handleCopyUrl}
-              disabled={!referralUrl}
+              disabled={!finalReferralUrl}
               className="slush-pill h-11 px-5 bg-black text-white hover:bg-neutral-800 text-xs font-bold shrink-0 flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {copiedUrl ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              {copiedUrl ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
               <span>{copiedUrl ? 'Copied Link!' : 'Copy Link'}</span>
             </button>
           </div>
@@ -115,7 +120,7 @@ export const ReferralShareCard: React.FC<ReferralShareCardProps> = ({
 
       {/* 1-Click WhatsApp Share Button */}
       <div className="pt-6 mt-6 border-t border-black/10">
-        {referralUrl ? (
+        {finalReferralUrl ? (
           <a
             href={whatsappUrl}
             target="_blank"
