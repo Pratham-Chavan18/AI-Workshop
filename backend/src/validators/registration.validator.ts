@@ -17,7 +17,10 @@ export const registrationSchema = z.object({
     .pipe(
       z
         .string()
-        .regex(/^\+?[0-9]\d{9,14}$/, 'Invalid phone number format. Provide 10-15 digits with optional country code.')
+        .regex(
+          /^(\+?[1-9]\d{9,14}|0\d{9,14})$/,
+          'Provide 10-15 digits (E.164 with optional +) or a local number starting with 0'
+        )
     )
     .optional()
     .nullable(),
@@ -34,8 +37,7 @@ export const registrationSchema = z.object({
     .trim()
     .toUpperCase()
     .regex(/^[A-Z0-9]{6,8}$/, 'Referral code must be 6-8 uppercase alphanumeric characters')
-    .optional()
-    .nullable(),
+    .optional(),
   source: z
     .enum(['whatsapp', 'direct', 'linkedin', 'twitter', 'instagram', 'other'])
     .default('direct'),
@@ -44,16 +46,29 @@ export const registrationSchema = z.object({
 export type RegistrationInput = z.infer<typeof registrationSchema>;
 
 /**
+ * Normalizes a phone number for storage and uniqueness checks.
+ * - Strips all non-digit characters.
+ * - Preserves a single leading '+' if (and only if) the input started with one.
+ * - Returns null for empty / non-numeric input.
+ */
+export function normalizePhone(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  const hasLeadingPlus = trimmed.startsWith('+');
+  const digits = trimmed.replace(/\D/g, '');
+  if (!digits) return null;
+  return hasLeadingPlus ? `+${digits}` : digits;
+}
+
+/**
  * Normalizes validated registration input.
  * Preserves leading '+' in phone numbers when present to retain standard E.164 semantics,
  * while stripping all non-digit characters (other than the leading '+') for consistent storage.
  */
 export function normalizeRegistration(data: RegistrationInput) {
-  const cleanedPhone = data.phone ? data.phone.replace(/[^\d+]/g, '') : null;
-
   return {
     ...data,
     emailNormalized: data.email.toLowerCase().trim(),
-    phoneNormalized: cleanedPhone || null,
+    phoneNormalized: normalizePhone(data.phone),
   };
 }

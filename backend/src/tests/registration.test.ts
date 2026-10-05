@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import './helpers/mockPrisma';
 import request from 'supertest';
 import { app } from '../app';
-import { registrationSchema, normalizeRegistration } from '../validators/registration.validator';
+import { registrationSchema, normalizeRegistration, normalizePhone } from '../validators/registration.validator';
 
 describe('Registration Validator & API Tests', () => {
   it('should validate and normalize valid registration payload', () => {
@@ -24,6 +24,34 @@ describe('Registration Validator & API Tests', () => {
     expect(normalized.fullName).toBe('Pratham Chavan');
   });
 
+  describe('normalizePhone helper unit tests', () => {
+    it('should strip non-digits and preserve leading plus', () => {
+      expect(normalizePhone('+91 98765 43210')).toBe('+919876543210');
+    });
+
+    it('should strip plus if not at the start', () => {
+      expect(normalizePhone('91+9876543210')).toBe('919876543210');
+    });
+
+    it('should preserve only a single leading plus', () => {
+      expect(normalizePhone('++919876543210')).toBe('+919876543210');
+    });
+
+    it('should preserve leading plus and strip internal plus signs', () => {
+      expect(normalizePhone('+91+987+654+3210')).toBe('+919876543210');
+    });
+
+    it('should return null for empty string or whitespace', () => {
+      expect(normalizePhone('')).toBe(null);
+      expect(normalizePhone('   ')).toBe(null);
+    });
+
+    it('should return null for null or undefined', () => {
+      expect(normalizePhone(null)).toBe(null);
+      expect(normalizePhone(undefined)).toBe(null);
+    });
+  });
+
   describe('Phone number validation & normalization', () => {
     const basePayload = {
       fullName: 'Pratham Chavan',
@@ -42,6 +70,17 @@ describe('Registration Validator & API Tests', () => {
       const parsed = registrationSchema.parse({ ...basePayload, phone: '09876543210' });
       const normalized = normalizeRegistration(parsed);
       expect(normalized.phoneNormalized).toBe('09876543210');
+    });
+
+    it('should accept local phone numbers starting with 01: 019876543210', () => {
+      const parsed = registrationSchema.parse({ ...basePayload, phone: '019876543210' });
+      const normalized = normalizeRegistration(parsed);
+      expect(normalized.phoneNormalized).toBe('019876543210');
+    });
+
+    it('should reject invalid +0... international phone numbers: +09876543210', () => {
+      const result = registrationSchema.safeParse({ ...basePayload, phone: '+09876543210' });
+      expect(result.success).toBe(false);
     });
 
     it('should reject invalid non-numeric phone: abc123', () => {
@@ -71,6 +110,11 @@ describe('Registration Validator & API Tests', () => {
     it('should normalize lowercase and whitespace-padded referral code: "  ab12cd "', () => {
       const parsed = registrationSchema.parse({ ...basePayload, referralCode: '  ab12cd ' });
       expect(parsed.referralCode).toBe('AB12CD');
+    });
+
+    it('should keep referralCode as undefined when omitted (type string | undefined)', () => {
+      const parsed = registrationSchema.parse(basePayload);
+      expect(parsed.referralCode).toBeUndefined();
     });
   });
 
