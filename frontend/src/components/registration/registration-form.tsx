@@ -17,11 +17,12 @@ const registrationSchema = z.object({
     .min(2, 'Name must be at least 2 characters')
     .max(100, 'Name cannot exceed 100 characters'),
   email: z.string().email('Please enter a valid email address'),
+  // NOTE: Regexes and validation rules are aligned with backend/src/validators/registration.validator.ts and must be kept in sync.
   phone: z
     .string()
     .refine(
-      (val) => !val || /^\+?[1-9]\d{9,14}$/.test(val.replace(/\s+/g, '')),
-      'Enter a valid 10-15 digit phone number (e.g. +91 9876543210)'
+      (val) => !val || /^(\+?[1-9]\d{9,14}|0\d{9,14})$/.test(val.replace(/\s+/g, '')),
+      'Provide 10-15 digits (E.164 with optional +) or a local number starting with 0'
     )
     .optional(),
   collegeId: z.string().uuid('Please select your college from the search list'),
@@ -30,7 +31,13 @@ const registrationSchema = z.object({
     .int()
     .min(2024, 'Year must be 2024 or later')
     .max(2028, 'Year must be 2028 or earlier'),
-  referralCode: z.string().optional(),
+  referralCode: z
+    .string()
+    .refine(
+      (val) => !val || /^[A-Z0-9]{6,8}$/.test(val.trim().toUpperCase()),
+      'Referral code must be 6-8 uppercase alphanumeric characters'
+    )
+    .optional(),
 });
 
 type FormValues = z.infer<typeof registrationSchema>;
