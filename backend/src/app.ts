@@ -52,14 +52,18 @@ export const createApp = (): Application => {
   app.use(httpLogger);
 
   // Health endpoint
+  app.get('/health', (_req: Request, res: Response) => {
+    res.json({ status: 'ok', uptime: process.uptime() });
+  });
   app.use('/health', healthRouter);
   app.get('/api/v1/health', (_req: Request, res: Response) => {
-    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+    res.status(200).json({ status: 'ok', uptime: process.uptime(), timestamp: new Date().toISOString() });
   });
 
   // API v1 routes
   app.use('/api/v1/colleges', collegesRouter);
   app.use('/api/v1/registrations', registrationsRouter);
+  app.use('/api/registrations', registrationsRouter);
   app.use('/api/v1/campaigns', campaignsRouter);
   app.use('/api/v1/users', usersRouter);
   app.use('/api/v1/leaderboard', leaderboardRouter);
