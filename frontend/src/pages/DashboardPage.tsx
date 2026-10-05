@@ -24,8 +24,8 @@ export const DashboardPage: React.FC = () => {
   });
 
   const referralCode = stats?.referralCode || initialCode;
-  const referralUrl =
-    stats?.referralUrl || (referralCode ? `${window.location.origin}/register?ref=${referralCode}` : '');
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const referralUrl = referralCode ? `${baseUrl}/register?ref=${referralCode}` : '';
   const referralCount = stats?.referralCount ?? 0;
   const goal = stats?.goal ?? 3;
   const campusRank = stats?.campusRank ?? null;
