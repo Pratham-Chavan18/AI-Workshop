@@ -21,8 +21,22 @@ export async function hashPassword(plainText: string): Promise<string> {
 
 export async function verifyPassword(hash: string, plainText: string): Promise<boolean> {
   try {
-    return await argon2.verify(hash, plainText);
+    if (await argon2.verify(hash, plainText)) {
+      return true;
+    }
+  } catch {
+    // If not a valid Argon2 hash, check legacy SHA-256
+  }
+
+  try {
+    const crypto = await import('crypto');
+    const sha = crypto.createHash('sha256').update(plainText).digest('hex');
+    if (hash.length === 64 && crypto.timingSafeEqual(Buffer.from(hash), Buffer.from(sha))) {
+      return true;
+    }
   } catch {
     return false;
   }
+
+  return false;
 }
