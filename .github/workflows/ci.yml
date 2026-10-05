@@ -2,9 +2,9 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
+    branches: [main, master]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -14,22 +14,24 @@ jobs:
   secret-scan:
     name: Secret & Credential Scanning
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: false
 
       - name: TruffleHog Secret Scan
-        uses: trufflesecurity/trufflehog@f19d6e5d2bef8a8ceca2b7d77ec447fc304f8078 # v3.88.5
+        uses: trufflesecurity/trufflehog@f19d6e5d2bef8a8ceca2b7d77ec447fc304f8078
         with:
           path: ./
-          extra_args: --only-verified
+          # Catch verified AND unknown results
+          extra_args: --results=verified,unknown
 
   quality-and-tests:
     name: Build, Audit & Test Suite
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: secret-scan
 
     services:
@@ -47,56 +49,87 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+    env:
+      DATABASE_URL: postgresql://postgres:postgrespassword@localhost:5432/aiworkshop_test?schema=public
+      NODE_ENV: test
+      CORS_ORIGIN: http://localhost:5173
+      SESSION_SECRET: ci_test_session_secret_at_least_32_characters_long
+      VITE_API_URL: http://localhost:4000/api/v1
+
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
 
-      - name: Set up Node.js 20.x
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: "npm"
 
+      # If npm workspaces are set up correctly at root, npm ci works.
+      # Otherwise, install per-workspace. Verify before relying on this.
       - name: Install Dependencies
         run: npm ci
 
-      - name: Dependency Security Audit
-        run: npm audit --audit-level=critical
+      - name: Dependency Audit (production, blocking)
+        run: npm audit --omit=dev --audit-level=high
 
-      - name: Prisma Schema Validation
+      - name: Dependency Audit (full, non-blocking)
+        run: npm audit --audit-level=critical
+        continue-on-error: true
+
+      - name: Prisma Validate & Generate
         run: |
           cd backend
           npx prisma validate
-
-      - name: Generate Prisma Client
-        run: |
-          cd backend
           npx prisma generate
 
-      - name: Verify & Apply Database Migrations
-        env:
-          DATABASE_URL: postgresql://postgres:postgrespassword@localhost:5432/aiworkshop_test?schema=public
+      - name: Detect Schema Drift (migrations vs schema)
+        run: |
+          cd backend
+          npx prisma migrate diff \
+            --from-migrations ./prisma/migrations \
+            --to-schema-datamodel ./prisma/schema.prisma \
+            --exit-code
+
+      - name: Apply Migrations
         run: |
           cd backend
           npx prisma migrate deploy
 
-      - name: Frontend Quality Gates (Typecheck, Lint & Build)
+      - name: Seed Test Database
         run: |
-          npm run lint --workspace=frontend
-          npm run build --workspace=frontend
+          cd backend
+          npx prisma db seed
+        # Remove this step if tests own their fixtures.
 
-      - name: Backend Quality Gates (Typecheck, Lint & Build)
-        run: |
-          npm run lint --workspace=backend
-          npm run build --workspace=backend
+      - name: Frontend Lint
+        run: npm run lint --workspace=frontend
 
-      - name: Run Backend Tests (Unit & Concurrency Integration)
+      - name: Frontend Build
         env:
-          DATABASE_URL: postgresql://postgres:postgrespassword@localhost:5432/aiworkshop_test?schema=public
-          SESSION_SECRET: test_session_secret_for_ci_at_least_32_characters_long_12345
-          NODE_ENV: test
-          CORS_ORIGIN: http://localhost:5173
-        run: |
-          npm run test --workspace=backend
+          NODE_ENV: production
+        run: npm run build --workspace=frontend
+
+      - name: Frontend Tests
+        run: npm run test --workspace=frontend
+        # Requires a `test` script in frontend/package.json.
+
+      - name: Backend Lint
+        run: npm run lint --workspace=backend
+
+      - name: Backend Build
+        env:
+          NODE_ENV: production
+        run: npm run build --workspace=backend
+
+      - name: Backend Tests (real DB)
+        run: npm run test --workspace=backend -- --coverage
+
+      - name: Upload Coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage/
+          retention-days: 7
