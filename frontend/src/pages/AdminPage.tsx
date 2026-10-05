@@ -342,12 +342,12 @@ export const AdminPage: React.FC = () => {
               </div>
             ) : stats ? (
               <KPICards
-                registrations={stats.registrations}
-                target={stats.target}
-                goalProgress={stats.conversionRate}
-                referralRegistrations={stats.referrals}
-                referralRate={stats.conversionRate}
-                activeCampuses={stats.collegesCount}
+                registrations={stats.registrations ?? 0}
+                target={stats.target ?? 500}
+                goalProgress={stats.goalProgress ?? stats.conversionRate ?? 0}
+                referralRegistrations={stats.referralRegistrations ?? stats.referrals ?? 0}
+                referralRate={stats.referralRate ?? stats.conversionRate ?? 0}
+                activeCampuses={stats.activeCampuses ?? stats.collegesCount ?? 0}
               />
             ) : null}
 

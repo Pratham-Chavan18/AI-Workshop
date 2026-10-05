@@ -2,47 +2,54 @@ import React from 'react';
 import { Users, Target, Share2, Building2 } from 'lucide-react';
 
 export interface KPICardsProps {
-  registrations: number;
-  target: number;
-  goalProgress: number;
-  referralRegistrations: number;
-  referralRate: number;
-  activeCampuses: number;
+  registrations?: number;
+  target?: number;
+  goalProgress?: number;
+  referralRegistrations?: number;
+  referralRate?: number;
+  activeCampuses?: number;
 }
 
 export const KPICards: React.FC<KPICardsProps> = ({
-  registrations,
-  target,
-  goalProgress,
-  referralRegistrations,
-  referralRate,
-  activeCampuses,
+  registrations = 0,
+  target = 500,
+  goalProgress = 0,
+  referralRegistrations = 0,
+  referralRate = 0,
+  activeCampuses = 0,
 }) => {
+  const safeRegistrations = registrations ?? 0;
+  const safeTarget = target ?? 500;
+  const safeGoalProgress = goalProgress ?? 0;
+  const safeReferralRegs = referralRegistrations ?? 0;
+  const safeReferralRate = referralRate ?? 0;
+  const safeActiveCampuses = activeCampuses ?? 0;
+
   const cards = [
     {
       title: 'Total Registrations',
-      value: registrations.toLocaleString(),
-      subtext: `Goal: ${target} students`,
+      value: safeRegistrations.toLocaleString(),
+      subtext: `Goal: ${safeTarget} students`,
       icon: Users,
       badgeColor: 'bg-slush-sky text-black',
     },
     {
       title: 'Goal Progress',
-      value: `${goalProgress}%`,
-      subtext: `${Math.max(target - registrations, 0)} spots remaining`,
+      value: `${safeGoalProgress}%`,
+      subtext: `${Math.max(safeTarget - safeRegistrations, 0)} spots remaining`,
       icon: Target,
       badgeColor: 'bg-slush-mint text-black',
     },
     {
       title: 'Referral Rate',
-      value: `${referralRate}%`,
-      subtext: `${referralRegistrations} via referral link`,
+      value: `${safeReferralRate}%`,
+      subtext: `${safeReferralRegs} via referral link`,
       icon: Share2,
       badgeColor: 'bg-slush-sunburst text-black',
     },
     {
       title: 'Active Campuses',
-      value: activeCampuses.toString(),
+      value: safeActiveCampuses.toString(),
       subtext: 'Engineering institutions represented',
       icon: Building2,
       badgeColor: 'bg-slush-lavender text-black',

@@ -5,8 +5,11 @@ export interface CampaignStatsResult {
   target: number;
   registrations: number;
   referralRegistrations: number;
+  referrals?: number;
   activeCampuses: number;
+  collegesCount?: number;
   referralRate: number;
+  conversionRate?: number;
   goalProgress: number;
 }
 
@@ -68,8 +71,11 @@ export async function getCampaignStats(campaignId: string): Promise<CampaignStat
     target,
     registrations: totalRegistrations,
     referralRegistrations,
+    referrals: referralRegistrations,
     activeCampuses,
+    collegesCount: activeCampuses,
     referralRate,
+    conversionRate: referralRate,
     goalProgress,
   };
 }

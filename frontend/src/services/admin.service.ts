@@ -9,9 +9,13 @@ export interface AdminUser {
 export interface CampaignStats {
   registrations: number;
   target: number;
-  referrals: number;
-  conversionRate: number;
-  collegesCount: number;
+  referralRegistrations?: number;
+  referrals?: number;
+  referralRate?: number;
+  conversionRate?: number;
+  goalProgress?: number;
+  activeCampuses?: number;
+  collegesCount?: number;
   hoursRemaining?: number;
 }
 

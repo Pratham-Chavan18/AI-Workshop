@@ -16,6 +16,20 @@ describe('Real PostgreSQL Concurrency & Unique Constraint Race Condition Tests',
   let testCampaignId: string;
   let testCollegeId: string;
 
+  let originalCampaignStatuses: Array<{ id: string; status: string }> = [];
+
+  const restoreCampaignStatuses = async () => {
+    if (!realPrisma || originalCampaignStatuses.length === 0) return;
+    for (const c of originalCampaignStatuses) {
+      await realPrisma.campaign
+        .update({
+          where: { id: c.id },
+          data: { status: c.status },
+        })
+        .catch(() => {});
+    }
+  };
+
   beforeAll(async () => {
     // Only connect if DATABASE_URL is set and not a placeholder
     const dbUrl = process.env.DATABASE_URL || '';
@@ -24,12 +38,19 @@ describe('Real PostgreSQL Concurrency & Unique Constraint Race Condition Tests',
       return;
     }
 
+    let setupSucceeded = false;
     try {
       realPrisma = new PrismaClient({
         datasources: { db: { url: dbUrl } },
       });
       await realPrisma.$queryRaw`SELECT 1`;
       isPostgresAvailable = true;
+
+      // Record original statuses of any other campaigns before pausing
+      originalCampaignStatuses = await realPrisma.campaign.findMany({
+        where: { slug: { not: 'concurrency-test-campaign' } },
+        select: { id: true, status: true },
+      });
 
       // Pause any other campaigns so concurrency-test-campaign is the only active one
       await realPrisma.campaign.updateMany({
@@ -68,9 +89,14 @@ describe('Real PostgreSQL Concurrency & Unique Constraint Race Condition Tests',
         },
       });
       testCollegeId = col.id;
+      setupSucceeded = true;
     } catch (err) {
-      console.warn('⚠️ Real PostgreSQL unreachable:', (err as Error).message);
+      console.warn('⚠️ Real PostgreSQL unreachable or setup failed:', (err as Error).message);
       isPostgresAvailable = false;
+    } finally {
+      if (!setupSucceeded && isPostgresAvailable) {
+        await restoreCampaignStatuses();
+      }
     }
   });
 
@@ -87,12 +113,10 @@ describe('Real PostgreSQL Concurrency & Unique Constraint Race Condition Tests',
         await realPrisma.campaign.deleteMany({
           where: { id: testCampaignId },
         });
-        await realPrisma.campaign.updateMany({
-          where: { slug: 'ai60-oct-2026' },
-          data: { status: 'active' },
-        });
       } catch (e) {
         // ignore cleanup error
+      } finally {
+        await restoreCampaignStatuses();
       }
       await realPrisma.$disconnect();
     }
