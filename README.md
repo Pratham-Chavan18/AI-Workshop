@@ -1,6 +1,7 @@
 # AI Workshop — Campus Referral & Leaderboard
 
 ## Project Goal
+
 Build a lightweight campaign platform that helps NxtWave acquire 500 final-year engineering student registrations for the free online workshop **“Build Your First AI Project in 60 Minutes.”**
 
 The core growth loop is:
@@ -10,6 +11,7 @@ The core growth loop is:
 ## MVP
 
 ### Student-facing
+
 - Landing page with workshop value proposition
 - Registration form
 - Unique referral code and referral URL
@@ -19,6 +21,7 @@ The core growth loop is:
 - Registration confirmation page
 
 ### Ambassador/admin-facing
+
 - Basic campus leaderboard
 - Registration totals
 - Referral totals
@@ -27,6 +30,7 @@ The core growth loop is:
 - Ability to export registration data
 
 ## Recommended Stack
+
 - Frontend: React + Vite + TypeScript + Tailwind CSS + shadcn/ui
 - Backend: Node.js + Express + TypeScript
 - Database: Supabase PostgreSQL
@@ -46,6 +50,7 @@ ai-workshop/
 ```
 
 ## Documentation
+
 - `docs/01-product-requirements.md` — product requirements and scope
 - `docs/02-campaign-strategy.md` — campaign and acquisition model
 - `docs/03-system-architecture.md` — architecture and data flow
@@ -56,10 +61,13 @@ ai-workshop/
 - `docs/08-qa-test-plan.md` — testing checklist
 
 ## Success Metrics
+
 Primary KPI:
+
 - 500 valid workshop registrations within 7 days
 
 Secondary KPIs:
+
 - Referral registration rate
 - Average referrals per registrant
 - Number of active campuses
@@ -68,4 +76,7 @@ Secondary KPIs:
 - Top-performing campus ambassadors
 
 ## Definition of Done for MVP
+
 A student can land on the site, understand the workshop in under 10 seconds, register successfully, receive a referral link, share it through WhatsApp, and have a friend’s valid registration automatically credited to the correct referrer and campus.
+
+# AI-Workshop
