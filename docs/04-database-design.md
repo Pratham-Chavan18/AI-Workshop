@@ -34,7 +34,9 @@ Fields:
 - college_id
 - full_name
 - email
+- emailNormalized
 - phone
+- phoneNormalized
 - graduation_year
 - referral_code
 - referred_by_user_id
@@ -42,7 +44,7 @@ Fields:
 - created_at
 
 Constraints:
-- unique(campaign_id, email)
+- unique(campaign_id, emailNormalized)
 - unique(referral_code)
 
 ### referrals
