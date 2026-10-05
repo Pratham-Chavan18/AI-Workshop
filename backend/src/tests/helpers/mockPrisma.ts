@@ -1,5 +1,15 @@
 import { vi } from 'vitest';
 
+export const mockDb = {
+  users: [] as any[],
+  referrals: [] as any[],
+};
+
+export function resetMockDb() {
+  mockDb.users = [];
+  mockDb.referrals = [];
+}
+
 export const mockPrisma = {
   campaign: {
     findFirst: vi.fn().mockResolvedValue({
@@ -28,25 +38,91 @@ export const mockPrisma = {
       { id: 'college-1', name: 'IIT Bombay', city: 'Mumbai', state: 'Maharashtra' },
       { id: 'college-2', name: 'BITS Pilani', city: 'Pilani', state: 'Rajasthan' },
     ]),
-    findUnique: vi.fn().mockResolvedValue({
-      id: '00000000-0000-0000-0000-000000000001',
-      name: 'IIT Bombay',
-      city: 'Mumbai',
-      state: 'Maharashtra',
-    }),
+    findUnique: vi.fn().mockImplementation(({ where }) =>
+      Promise.resolve({
+        id: where?.id || '00000000-0000-0000-0000-000000000001',
+        name: 'IIT Bombay',
+        city: 'Mumbai',
+        state: 'Maharashtra',
+      })
+    ),
     upsert: vi.fn(),
   },
   user: {
-    findFirst: vi.fn().mockResolvedValue(null),
-    findUnique: vi.fn().mockResolvedValue(null),
+    findFirst: vi.fn().mockImplementation(({ where }) => {
+      if (where?.campaignId && where?.phoneNormalized) {
+        const found = mockDb.users.find(
+          (u) => u.campaignId === where.campaignId && u.phoneNormalized === where.phoneNormalized
+        );
+        return Promise.resolve(found || null);
+      }
+      return Promise.resolve(mockDb.users[0] || null);
+    }),
+    findUnique: vi.fn().mockImplementation(({ where }) => {
+      if (where?.referralCode) {
+        const found = mockDb.users.find((u) => u.referralCode === where.referralCode);
+        return Promise.resolve(found || null);
+      }
+      if (where?.id) {
+        const found = mockDb.users.find((u) => u.id === where.id);
+        return Promise.resolve(found || null);
+      }
+      if (where?.campaignId_emailNormalized) {
+        const found = mockDb.users.find(
+          (u) =>
+            u.campaignId === where.campaignId_emailNormalized.campaignId &&
+            u.emailNormalized === where.campaignId_emailNormalized.emailNormalized
+        );
+        return Promise.resolve(found || null);
+      }
+      return Promise.resolve(null);
+    }),
     findMany: vi.fn().mockResolvedValue([]),
-    create: vi.fn().mockImplementation(({ data }) =>
-      Promise.resolve({
-        id: 'new-user-id',
+    create: vi.fn().mockImplementation(({ data }) => {
+      // Check unique constraint: (campaignId, emailNormalized)
+      const existingEmail = mockDb.users.find(
+        (u) => u.campaignId === data.campaignId && u.emailNormalized === data.emailNormalized
+      );
+      if (existingEmail) {
+        const err: any = new Error('Unique constraint failed on the fields: (`campaignId`, `emailNormalized`)');
+        err.code = 'P2002';
+        err.meta = { target: ['campaignId', 'emailNormalized'] };
+        return Promise.reject(err);
+      }
+
+      // Check unique constraint: (campaignId, phoneNormalized)
+      if (data.phoneNormalized) {
+        const existingPhone = mockDb.users.find(
+          (u) => u.campaignId === data.campaignId && u.phoneNormalized === data.phoneNormalized
+        );
+        if (existingPhone) {
+          const err: any = new Error('Unique constraint failed on the fields: (`campaignId`, `phoneNormalized`)');
+          err.code = 'P2002';
+          err.meta = { target: ['campaignId', 'phoneNormalized'] };
+          return Promise.reject(err);
+        }
+      }
+
+      // Check unique constraint: referralCode
+      if (data.referralCode) {
+        const existingCode = mockDb.users.find((u) => u.referralCode === data.referralCode);
+        if (existingCode) {
+          const err: any = new Error('Unique constraint failed on the fields: (`referralCode`)');
+          err.code = 'P2002';
+          err.meta = { target: ['referralCode'] };
+          return Promise.reject(err);
+        }
+      }
+
+      const newUser = {
+        id: `user-${mockDb.users.length + 1}`,
+        createdAt: new Date(),
         ...data,
-      })
-    ),
-    count: vi.fn().mockResolvedValue(15),
+      };
+      mockDb.users.push(newUser);
+      return Promise.resolve(newUser);
+    }),
+    count: vi.fn().mockImplementation(() => Promise.resolve(mockDb.users.length || 15)),
     groupBy: vi.fn().mockResolvedValue([
       { collegeId: 'college-1', _count: { id: 10 } },
       { source: 'whatsapp', _count: { id: 10 } },
@@ -55,21 +131,32 @@ export const mockPrisma = {
   },
   referral: {
     findUnique: vi.fn().mockResolvedValue(null),
-    create: vi.fn().mockImplementation(({ data }) =>
-      Promise.resolve({
-        id: 'new-referral-id',
+    create: vi.fn().mockImplementation(({ data }) => {
+      const newRef = {
+        id: `ref-${mockDb.referrals.length + 1}`,
+        createdAt: new Date(),
         ...data,
-      })
-    ),
-    count: vi.fn().mockResolvedValue(5),
+      };
+      mockDb.referrals.push(newRef);
+      return Promise.resolve(newRef);
+    }),
+    count: vi.fn().mockImplementation(() => Promise.resolve(mockDb.referrals.length || 5)),
   },
   adminUser: {
     findUnique: vi.fn(),
     upsert: vi.fn(),
   },
-  $transaction: vi.fn().mockImplementation((cb) => {
+  $transaction: vi.fn().mockImplementation(async (cb) => {
     if (typeof cb === 'function') {
-      return cb(mockPrisma);
+      const usersSnapshot = [...mockDb.users];
+      const referralsSnapshot = [...mockDb.referrals];
+      try {
+        return await cb(mockPrisma);
+      } catch (err) {
+        mockDb.users = usersSnapshot;
+        mockDb.referrals = referralsSnapshot;
+        throw err;
+      }
     }
     return Promise.resolve(cb);
   }),

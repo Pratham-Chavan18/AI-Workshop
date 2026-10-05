@@ -13,16 +13,19 @@ export class AppError extends Error {
 }
 
 export const campaignClosed = (msg = 'Campaign is currently closed or not accepting registrations'): AppError =>
-  new AppError(msg, 422, 'CAMPAIGN_CLOSED');
+  new AppError(msg, 410, 'CAMPAIGN_CLOSED');
 
 export const emailAlreadyRegistered = (msg = 'This email is already registered for the workshop'): AppError =>
   new AppError(msg, 409, 'EMAIL_ALREADY_REGISTERED');
+
+export const phoneAlreadyRegistered = (msg = 'This phone number is already registered for the workshop'): AppError =>
+  new AppError(msg, 409, 'PHONE_ALREADY_REGISTERED');
 
 export const invalidReferralCode = (msg = 'Invalid or non-existent referral code'): AppError =>
   new AppError(msg, 400, 'INVALID_REFERRAL_CODE');
 
 export const selfReferral = (msg = 'You cannot refer yourself'): AppError =>
-  new AppError(msg, 400, 'SELF_REFERRAL_NOT_ALLOWED');
+  new AppError(msg, 400, 'SELF_REFERRAL');
 
 export const validationError = (msg = 'Validation failed', details?: unknown): AppError =>
   new AppError(msg, 400, 'VALIDATION_ERROR', details);

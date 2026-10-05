@@ -41,6 +41,7 @@ model User {
   collegeId        String
   fullName         String
   email            String
+  // MUST be lowercased and trimmed by the application layer prior to persistence.
   emailNormalized  String    // lowercase, trimmed
   phone            String?
   phoneNormalized  String?   // digits only with country code
@@ -61,6 +62,7 @@ model User {
   // TODO: Consider global user identity — currently User is scoped per campaign (@@unique([campaignId, emailNormalized])).
   // A future "Person" or "StudentProfile" model could maintain global identity across multiple campaigns.
   @@unique([campaignId, emailNormalized])
+  @@unique([campaignId, phoneNormalized])
   @@index([campaignId])
   @@index([referralCode])
   @@index([collegeId])

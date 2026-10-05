@@ -11,6 +11,7 @@ export const registerStudentHandler = async (
     res.status(201).json({
       success: true,
       user: result.user,
+      data: result.user,
     });
   } catch (error) {
     next(error);
