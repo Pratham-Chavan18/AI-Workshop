@@ -58,6 +58,8 @@ model User {
   referralsMade    Referral[] @relation("ReferrerReferrals")
   referralReceived Referral?  @relation("ReferredReferrals")
 
+  // TODO: Consider global user identity — currently User is scoped per campaign (@@unique([campaignId, emailNormalized])).
+  // A future "Person" or "StudentProfile" model could maintain global identity across multiple campaigns.
   @@unique([campaignId, emailNormalized])
   @@index([campaignId])
   @@index([referralCode])

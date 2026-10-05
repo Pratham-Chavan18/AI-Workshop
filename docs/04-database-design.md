@@ -118,3 +118,33 @@ Public APIs should return only:
 - rank
 
 Do not return email or phone publicly.
+
+## Global User Identity vs. Campaign-Scoped Users (Future Architecture)
+
+### Current Design
+The `users` table enforces a compound uniqueness constraint:
+```sql
+CONSTRAINT unique_campaign_email UNIQUE (campaign_id, email_normalized)
+```
+This isolates users strictly per-campaign:
+- **Pros**: Clean data partitioning, independent campaign lifecycle, campaign-isolated referral codes, and zero collision across concurrent or sequential workshops.
+- **Trade-off**: When the same student registers for multiple campaigns, two separate `User` rows are created with distinct referral codes and independent referral counts.
+
+### Proposed Future Architecture ("Person" Model)
+To unify student identities globally across multiple campaigns while preserving discrete campaign registrations:
+1. **`Person` / `StudentProfile`**:
+   - `id`: UUID (Primary Key)
+   - `email`: Normalized lowercase unique email (`UNIQUE`)
+   - `phone`: Normalized E.164 phone number
+   - `college_id`: Reference to global `colleges`
+   - `created_at`: Timestamp
+2. **`CampaignRegistration` (replaces or refactors `User`)**:
+   - `id`: UUID
+   - `person_id`: Foreign key to `Person(id)`
+   - `campaign_id`: Foreign key to `Campaign(id)`
+   - `referral_code`: Campaign-specific unique referral code
+   - `referred_by_person_id`: Foreign key to referring `Person`
+   - `created_at`: Timestamp
+   - Unique constraint: `UNIQUE (person_id, campaign_id)`
+
+This separation allows persistent cross-campaign student reputation, single sign-on/profile management, and unified analytics without compromising campaign-level attribution.
