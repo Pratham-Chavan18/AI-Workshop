@@ -1,6 +1,5 @@
 # AI Workshop — Campus Referral & Leaderboard
 
-[![CI Quality Gates](https://github.com/Pratham-Chavan18/AI-Workshop/actions/workflows/ci.yml/badge.svg)](https://github.com/Pratham-Chavan18/AI-Workshop/actions/workflows/ci.yml)
 [![Node.js](https://img.shields.io/badge/Node.js-20.x-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=black)](https://react.dev/)
