@@ -85,11 +85,60 @@ jobs:
           npx prisma validate
           npx prisma generate
 
-      - name: Create Shadow Database
+      - name: Install PostgreSQL Client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Create Supabase Roles (test database)
+        env:
+          PGPASSWORD: postgrespassword
         run: |
-          PGPASSWORD=postgrespassword psql -h localhost -U postgres -d aiworkshop_test -c "CREATE DATABASE aiworkshop_shadow;" 2>/dev/null || \
-          PGPASSWORD=postgrespassword psql -h 127.0.0.1 -U postgres -d aiworkshop_test -c "CREATE DATABASE aiworkshop_shadow;" 2>/dev/null || \
-          docker exec $(docker ps -q --filter ancestor=postgres:15-alpine | head -n1) psql -U postgres -d aiworkshop_test -c "CREATE DATABASE aiworkshop_shadow;" 2>/dev/null || true
+          psql -h localhost -U postgres -d aiworkshop_test <<'SQL'
+            DO $$
+            BEGIN
+              IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'anon') THEN
+                CREATE ROLE anon NOLOGIN;
+              END IF;
+              IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'authenticated') THEN
+                CREATE ROLE authenticated NOLOGIN;
+              END IF;
+              IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'service_role') THEN
+                CREATE ROLE service_role NOLOGIN BYPASSRLS;
+              END IF;
+              IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'authenticator') THEN
+                CREATE ROLE authenticator NOINHERIT LOGIN;
+              END IF;
+            END
+            $$;
+          SQL
+
+      - name: Create Shadow Database
+        env:
+          PGPASSWORD: postgrespassword
+        run: |
+          psql -h localhost -U postgres -d postgres -c "CREATE DATABASE aiworkshop_shadow;"
+
+      - name: Create Supabase Roles (shadow database)
+        env:
+          PGPASSWORD: postgrespassword
+        run: |
+          psql -h localhost -U postgres -d aiworkshop_shadow <<'SQL'
+            DO $$
+            BEGIN
+              IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'anon') THEN
+                CREATE ROLE anon NOLOGIN;
+              END IF;
+              IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'authenticated') THEN
+                CREATE ROLE authenticated NOLOGIN;
+              END IF;
+              IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'service_role') THEN
+                CREATE ROLE service_role NOLOGIN BYPASSRLS;
+              END IF;
+              IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'authenticator') THEN
+                CREATE ROLE authenticator NOINHERIT LOGIN;
+              END IF;
+            END
+            $$;
+          SQL
 
       - name: Detect Schema Drift (migrations vs schema)
         run: |
