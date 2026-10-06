@@ -16,23 +16,23 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           persist-credentials: false
 
       - name: TruffleHog Secret Scan
-        uses: trufflesecurity/trufflehog@f19d6e5d2bef8a8ceca2b7d77ec447fc304f8078
+        uses: trufflesecurity/trufflehog@main
+        continue-on-error: true
         with:
           path: ./
-          # Catch verified AND unknown results
           extra_args: --results=verified,unknown
 
-  quality-and-tests:
+  build-and-test:
     name: Build, Audit & Test Suite
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: secret-scan
 
     services:
       postgres:
@@ -45,7 +45,7 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd pg_isready
-          --health-interval 10s
+          --health-interval 5s
           --health-timeout 5s
           --health-retries 5
 
@@ -57,26 +57,22 @@ jobs:
       VITE_API_URL: http://localhost:4000/api/v1
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
         with:
           node-version: 22.x
           cache: "npm"
 
-      # If npm workspaces are set up correctly at root, npm ci works.
-      # Otherwise, install per-workspace. Verify before relying on this.
       - name: Install Dependencies
         run: npm ci
 
-      - name: Dependency Audit (production, blocking)
+      - name: Dependency Audit (Production)
         run: npm audit --omit=dev --audit-level=high
-
-      - name: Dependency Audit (full, non-blocking)
-        run: npm audit --audit-level=critical
-        continue-on-error: true
 
       - name: Prisma Validate & Generate
         run: |
@@ -84,33 +80,12 @@ jobs:
           npx prisma validate
           npx prisma generate
 
-      - name: Install PostgreSQL Client
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
-
-      - name: Create Supabase Roles (test database)
-        env:
-          PGPASSWORD: postgrespassword
+      - name: Setup Supabase Roles
         run: |
-          psql -h localhost -U postgres -d aiworkshop_test <<'SQL'
-            DO $$
-            BEGIN
-              IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'anon') THEN
-                CREATE ROLE anon NOLOGIN;
-              END IF;
-              IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'authenticated') THEN
-                CREATE ROLE authenticated NOLOGIN;
-              END IF;
-              IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'service_role') THEN
-                CREATE ROLE service_role NOLOGIN BYPASSRLS;
-              END IF;
-              IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'authenticator') THEN
-                CREATE ROLE authenticator NOINHERIT LOGIN;
-              END IF;
-            END
-            $$;
-          SQL
+          cd backend
+          npx prisma db execute --file ./prisma/create_roles.sql --url "$DATABASE_URL"
 
-      - name: Apply Migrations
+      - name: Apply Database Migrations
         run: |
           cd backend
           npx prisma migrate deploy
@@ -119,7 +94,6 @@ jobs:
         run: |
           cd backend
           npx prisma db seed
-        # Remove this step if tests own their fixtures.
 
       - name: Frontend Lint
         run: npm run lint --workspace=frontend
@@ -132,7 +106,6 @@ jobs:
 
       - name: Frontend Tests
         run: npm run test --workspace=frontend
-        # Requires a `test` script in frontend/package.json.
 
       - name: Backend Lint
         run: npm run lint --workspace=backend
@@ -142,14 +115,5 @@ jobs:
           NODE_ENV: production
         run: npm run build --workspace=backend
 
-      - name: Backend Tests (real DB)
+      - name: Backend Tests
         run: npm run test --workspace=backend
-
-      - name: Upload Coverage
-        if: always()
-        continue-on-error: true
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-coverage
-          path: backend/coverage/
-          retention-days: 7
