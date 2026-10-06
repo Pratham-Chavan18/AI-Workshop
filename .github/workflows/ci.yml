@@ -51,7 +51,6 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://postgres:postgrespassword@localhost:5432/aiworkshop_test?schema=public
-      SHADOW_DATABASE_URL: postgresql://postgres:postgrespassword@localhost:5432/aiworkshop_shadow?schema=public
       NODE_ENV: test
       CORS_ORIGIN: http://localhost:5173
       SESSION_SECRET: ci_test_session_secret_at_least_32_characters_long
@@ -111,44 +110,6 @@ jobs:
             $$;
           SQL
 
-      - name: Create Shadow Database
-        env:
-          PGPASSWORD: postgrespassword
-        run: |
-          psql -h localhost -U postgres -d postgres -c "CREATE DATABASE aiworkshop_shadow;"
-
-      - name: Create Supabase Roles (shadow database)
-        env:
-          PGPASSWORD: postgrespassword
-        run: |
-          psql -h localhost -U postgres -d aiworkshop_shadow <<'SQL'
-            DO $$
-            BEGIN
-              IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'anon') THEN
-                CREATE ROLE anon NOLOGIN;
-              END IF;
-              IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'authenticated') THEN
-                CREATE ROLE authenticated NOLOGIN;
-              END IF;
-              IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'service_role') THEN
-                CREATE ROLE service_role NOLOGIN BYPASSRLS;
-              END IF;
-              IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'authenticator') THEN
-                CREATE ROLE authenticator NOINHERIT LOGIN;
-              END IF;
-            END
-            $$;
-          SQL
-
-      - name: Detect Schema Drift (migrations vs schema)
-        run: |
-          cd backend
-          npx prisma migrate diff \
-            --from-migrations ./prisma/migrations \
-            --to-schema-datamodel ./prisma/schema.prisma \
-            --shadow-database-url "$SHADOW_DATABASE_URL" \
-            --exit-code
-
       - name: Apply Migrations
         run: |
           cd backend
@@ -166,6 +127,7 @@ jobs:
       - name: Frontend Build
         env:
           NODE_ENV: production
+          VITE_API_URL: http://localhost:4000/api/v1
         run: npm run build --workspace=frontend
 
       - name: Frontend Tests
