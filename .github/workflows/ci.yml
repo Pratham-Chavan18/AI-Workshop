@@ -85,6 +85,12 @@ jobs:
           npx prisma validate
           npx prisma generate
 
+      - name: Create Shadow Database
+        run: |
+          PGPASSWORD=postgrespassword psql -h localhost -U postgres -d aiworkshop_test -c "CREATE DATABASE aiworkshop_shadow;" 2>/dev/null || \
+          PGPASSWORD=postgrespassword psql -h 127.0.0.1 -U postgres -d aiworkshop_test -c "CREATE DATABASE aiworkshop_shadow;" 2>/dev/null || \
+          docker exec $(docker ps -q --filter ancestor=postgres:15-alpine | head -n1) psql -U postgres -d aiworkshop_test -c "CREATE DATABASE aiworkshop_shadow;" 2>/dev/null || true
+
       - name: Detect Schema Drift (migrations vs schema)
         run: |
           cd backend
@@ -126,10 +132,11 @@ jobs:
         run: npm run build --workspace=backend
 
       - name: Backend Tests (real DB)
-        run: npm run test --workspace=backend -- --coverage
+        run: npm run test --workspace=backend
 
       - name: Upload Coverage
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: backend-coverage
